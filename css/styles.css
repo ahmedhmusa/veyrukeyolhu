@@ -577,15 +577,24 @@ input, select, textarea { font-family: inherit; }
   backdrop-filter: blur(var(--blur-strong)) saturate(1.7);
   -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(1.7);
   border: 1px solid var(--glass-border-soft); border-bottom: none;
-  border-radius: 28px 28px 0 0; padding: 10px 20px calc(24px + var(--safe-bottom));
+  border-radius: 28px 28px 0 0; padding: 0 20px calc(24px + var(--safe-bottom));
   transform: translateY(100%); transition: transform 0.32s cubic-bezier(.22,.68,.36,1);
   box-shadow: 0 -12px 44px rgba(0,0,0,0.28), inset 0 1px 1px rgba(255,255,255,0.4);
 }
 .sheet-overlay.open .sheet { transform: translateY(0); }
-.sheet-handle { width: 38px; height: 5px; border-radius: 3px; background: var(--border-strong); margin: 8px auto 14px; position: relative; z-index: 1; }
-.sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; position: relative; z-index: 1; }
+.sheet-sticky-bar {
+  position: sticky; top: 0; z-index: 10;
+  margin: 0 -20px; padding: 8px 20px 12px;
+  background: var(--surface-strong);
+  backdrop-filter: blur(var(--blur-strong)) saturate(1.7);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(1.7);
+  border-bottom: 1px solid var(--glass-border-soft);
+}
+.sheet-body { padding-top: 14px; }
+.sheet-handle { width: 38px; height: 5px; border-radius: 3px; background: var(--border-strong); margin: 2px auto 10px; position: relative; z-index: 1; }
+.sheet-header { display: flex; align-items: center; justify-content: space-between; margin: 0; position: relative; z-index: 1; }
 .sheet-header h2 { font-family: var(--font-display); font-size: 19px; font-weight: 700; margin: 0; }
-.sheet-close { background: var(--border); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 15px; color: var(--text-secondary); }
+.sheet-close { background: var(--border); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 15px; color: var(--text-secondary); flex-shrink: 0; }
 .sheet-actions { display: flex; gap: 10px; margin-top: 6px; }
 
 /* full page sheet (catch detail etc.) */
@@ -606,7 +615,7 @@ input, select, textarea { font-family: inherit; }
 
 /* ---------- Map ---------- */
 #map-canvas { width: 100%; height: 100%; background: var(--border); }
-.map-wrap { position: relative; height: calc(100vh - var(--nav-height) - var(--safe-top) - var(--safe-bottom)); margin: -20px -28px 0; }
+.map-wrap { position: relative; height: calc(100dvh - var(--nav-height) - var(--safe-top) - var(--safe-bottom)); margin: -20px -28px 0; }
 .map-controls-top {
   position: absolute; top: 14px; left: 14px; right: 14px; z-index: 20;
   display: flex; flex-direction: column; gap: 10px;
