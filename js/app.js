@@ -209,11 +209,17 @@ window.addEventListener("hashchange", () => navigate(location.hash.replace("#", 
 // ---------------------------------------------------------------
 function openSheet(innerHTML, { tall = false, onClose = null } = {}) {
   const sheetRoot = $("#sheet-root");
+  const headerMatch = innerHTML.match(/^\s*<div class="sheet-header">[\s\S]*?<\/div>\s*/);
+  const headerHTML = headerMatch ? headerMatch[0] : "";
+  const restHTML = headerMatch ? innerHTML.slice(headerMatch[0].length) : innerHTML;
   sheetRoot.innerHTML = `
     <div class="sheet-overlay" id="active-sheet-overlay">
       <div class="sheet ${tall ? "sheet-tall" : ""}" id="active-sheet">
-        <div class="sheet-handle"></div>
-        ${innerHTML}
+        <div class="sheet-sticky-bar">
+          <div class="sheet-handle"></div>
+          ${headerHTML}
+        </div>
+        <div class="sheet-body">${restHTML}</div>
       </div>
     </div>
   `;
