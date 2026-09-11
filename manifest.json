@@ -1,0 +1,17 @@
+{
+  "name": "VeyruKeyolhu",
+  "short_name": "VeyruKeyolhu",
+  "description": "A premium personal fishing companion for fishing in the Maldives — tides, Nakaiy, trips and catches, fully offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#060E15",
+  "theme_color": "#0C5F6E",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
