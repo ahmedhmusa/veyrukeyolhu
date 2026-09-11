@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>VeyruKeyolhu</title>
+<meta name="description" content="A premium personal fishing companion for fishing in the Maldives — tides, Nakaiy calendar, trips and catches, fully offline.">
+
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#F3F7F9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VeyruKeyolhu">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" href="./icons/icon-192.png">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+<div class="ocean-backdrop"></div>
+<div id="app-shell"><!-- rendered by app.js --></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="./js/data.js"></script>
+<script src="./js/db.js"></script>
+<script src="./js/view-home.js"></script>
+<script src="./js/view-map.js"></script>
+<script src="./js/view-trips.js"></script>
+<script src="./js/view-catches.js"></script>
+<script src="./js/view-more.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>
