@@ -161,7 +161,7 @@ input, select, textarea { font-family: inherit; }
 }
 
 /* ---------- Typography ---------- */
-.page-header { margin: 6px 2px 18px; }
+.page-header { margin: 6px 0 18px; }
 .page-header h1 {
   font-family: var(--font-display);
   font-size: 30px;
@@ -169,6 +169,7 @@ input, select, textarea { font-family: inherit; }
   letter-spacing: -0.02em;
   margin: 0 0 2px;
 }
+.page-header h1.brand-title { font-size: 25px; letter-spacing: -0.01em; }
 .page-header p {
   margin: 0;
   color: var(--text-secondary);
@@ -266,7 +267,10 @@ input, select, textarea { font-family: inherit; }
 .score-label { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-secondary); }
 .score-value-row { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; }
 .score-value { font-family: var(--font-display); font-size: 46px; font-weight: 800; letter-spacing: -0.03em; color: var(--lagoon-deep); }
-:root[data-theme="dark"] .score-value { color: var(--lagoon); }
+.score-value.grass { color: var(--seagrass); }
+.score-value.gold { color: var(--reef-gold); }
+.score-value.slow { color: var(--lagoon-deep); }
+:root[data-theme="dark"] .score-value.slow { color: var(--lagoon); }
 .score-tag {
   font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: var(--radius-pill);
   background: var(--seagrass-tint); color: var(--seagrass);
