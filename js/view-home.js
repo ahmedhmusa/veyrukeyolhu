@@ -32,6 +32,48 @@ function buildTideCurveSVG(tide) {
   </svg>`;
 }
 
+function tierColorVar(tagClass) {
+  if (tagClass === "grass") return "var(--seagrass)";
+  if (tagClass === "gold") return "var(--reef-gold)";
+  return "var(--lagoon-deep)";
+}
+
+function buildScoreCurveSVG(points, nowHours) {
+  const w = 320, h = 90, pad = 4;
+  const minS = 0, maxS = 100;
+  const toX = (hh) => pad + (hh / 24) * (w - pad * 2);
+  const toY = (val) => h - pad - ((val - minS) / (maxS - minS)) * (h - pad * 2);
+
+  const path = points.map((p, i) => `${i === 0 ? "M" : "L"}${toX(p.h).toFixed(1)},${toY(p.score).toFixed(1)}`).join(" ");
+  const areaPath = `${path} L${toX(24).toFixed(1)},${h} L${toX(0).toFixed(1)},${h} Z`;
+
+  const stops = points.filter((_, i) => i % 2 === 0).map((p) =>
+    `<stop offset="${((p.h / 24) * 100).toFixed(1)}%" stop-color="${tierColorVar(p.tagClass)}"/>`
+  ).join("");
+
+  const clampedNow = Math.min(24, Math.max(0, nowHours));
+  const nowScore = points.reduce((closest, p) => Math.abs(p.h - clampedNow) < Math.abs(closest.h - clampedNow) ? p : closest, points[0]);
+  const nowX = toX(clampedNow);
+  const nowY = toY(nowScore.score);
+
+  return `
+  <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="scoreLineGrad" x1="0" y1="0" x2="1" y2="0">
+        ${stops}
+      </linearGradient>
+      <linearGradient id="scoreAreaGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${tierColorVar(nowScore.tagClass)}" stop-opacity="0.30"/>
+        <stop offset="100%" stop-color="${tierColorVar(nowScore.tagClass)}" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    <path d="${areaPath}" fill="url(#scoreAreaGrad)" stroke="none"/>
+    <path d="${path}" fill="none" stroke="url(#scoreLineGrad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${nowX.toFixed(1)}" cy="${nowY.toFixed(1)}" r="4.5" fill="${tierColorVar(nowScore.tagClass)}"/>
+    <circle cx="${nowX.toFixed(1)}" cy="${nowY.toFixed(1)}" r="8" fill="${tierColorVar(nowScore.tagClass)}" opacity="0.22"/>
+  </svg>`;
+}
+
 function renderHome() {
   const now = new Date();
   const tide = getTideModel(now);
@@ -39,6 +81,7 @@ function renderHome() {
   const moon = getMoonPhase(now);
   const nakaiy = getCurrentNakaiy(now);
   const score = getFishingScore(tide, weather, moon);
+  const scoreCurve = getFishingScoreCurve(now, weather, moon);
   const reco = getRecommendation(tide, weather, moon, score);
 
   const dateStr = now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
@@ -46,7 +89,7 @@ function renderHome() {
   root().innerHTML = `
     <div class="page-header">
       <div class="hero-date">${esc(dateStr)}</div>
-      <h1>VeyruKeyolhu</h1>
+      <h1 class="brand-title">VeyruKeyolhu</h1>
     </div>
 
     <div class="card score-card">
@@ -54,12 +97,12 @@ function renderHome() {
         <div>
           <div class="score-label">FISHING CONDITIONS</div>
           <div class="score-value-row">
-            <span class="score-value">${score.score}%</span>
+            <span class="score-value ${score.tagClass}">${score.score}%</span>
           </div>
         </div>
         <span class="score-tag ${score.tagClass}">${score.tag}</span>
       </div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:${score.score}%"></div></div>
+      <div class="tide-curve-wrap" style="margin-top:12px;">${buildScoreCurveSVG(scoreCurve, tide.nowHours)}</div>
       <div class="score-note">${esc(reco)}</div>
       <div class="score-disclaimer">Personal, estimated score based on tide, moon, wind and your logged preferences — not a scientific forecast.</div>
     </div>

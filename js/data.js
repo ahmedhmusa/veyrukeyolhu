@@ -308,9 +308,51 @@ function getFishingScore(tide, weather, moon) {
   score = Math.max(8, Math.min(97, Math.round(score)));
   let tag = "Slow", tagClass = "slow";
   if (score >= 75) { tag = "Excellent"; tagClass = "grass"; }
-  else if (score >= 55) { tag = "Good"; tagClass = "gold"; }
+  else if (score >= 55) { tag = "Moderate"; tagClass = "gold"; }
   else { tag = "Slow"; tagClass = "slow"; }
   return { score, tag, tagClass };
+}
+
+// ---------------------------------------------------------------
+// Fishing score across the day — same weighting as getFishingScore,
+// but re-evaluates the tide-driven terms (movement + rising) at
+// each hour while holding today's weather/moon constant, so it can
+// be drawn as a curve the same way the tide card is.
+// ---------------------------------------------------------------
+function getFishingScoreCurve(date, weather, moon) {
+  const lunarDayHours = 24.8412;
+  const periodHours = lunarDayHours / 2;
+  const referenceEpoch = Date.UTC(2026, 0, 1, 4, 0);
+  const localMidnight = new Date(date); localMidnight.setHours(0, 0, 0, 0);
+  const hoursSinceEpochAtMidnight = (localMidnight.getTime() - referenceEpoch) / 3600000;
+  const dayIndex = Math.floor(date.getTime() / 86400000);
+  const phaseShift = ((hoursSinceEpochAtMidnight % periodHours) / periodHours) * 2 * Math.PI;
+  const amplitude = 0.42 + seededRandom(dayIndex + 1) * 0.06;
+
+  const points = [];
+  for (let h = 0; h <= 24; h += 0.25) {
+    const angle = (2 * Math.PI * h) / periodHours + phaseShift;
+    const rate = amplitude * (2 * Math.PI / periodHours) * Math.cos(angle);
+    const rising = rate > 0;
+    const movement = Math.abs(rate);
+
+    let score = 55;
+    score += Math.min(movement * 18, 20);
+    if (rising) score += 6;
+    if (weather.windSpeed >= 6 && weather.windSpeed <= 16) score += 10;
+    else score -= 5;
+    if (moon.name === "New Moon" || moon.name === "Full Moon") score += 8;
+    if (weather.waveHeight <= 1.0) score += 6;
+    else if (weather.waveHeight > 1.5) score -= 8;
+    score = Math.max(8, Math.min(97, Math.round(score)));
+
+    let tagClass = "slow";
+    if (score >= 75) tagClass = "grass";
+    else if (score >= 55) tagClass = "gold";
+
+    points.push({ h, score, tagClass });
+  }
+  return points;
 }
 
 function getRecommendation(tide, weather, moon, score) {
