@@ -87,7 +87,7 @@ function renderHome() {
   const dateStr = now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
 
   root().innerHTML = `
-    <div class="page-header">
+    <div class="page-header center">
       <div class="hero-date">${esc(dateStr)}</div>
       <h1 class="brand-title">VeyruKeyolhu</h1>
     </div>
