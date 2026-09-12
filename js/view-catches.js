@@ -24,7 +24,7 @@ function renderCatches() {
     </div>
     <div class="chip-row" id="catch-species-filter">
       <button class="chip ${State.catchFilters.species === "all" ? "active" : ""}" data-sp="all">All</button>
-      ${Species.map((s) => `<button class="chip ${State.catchFilters.species === s.id ? "active" : ""}" data-sp="${s.id}">${s.emoji} ${esc(s.name)}</button>`).join("")}
+      ${Species.map((s) => `<button class="chip ${State.catchFilters.species === s.id ? "active" : ""}" data-sp="${s.id}" style="display:inline-flex; align-items:center; gap:5px;">${speciesIconHTML(s, 15)} ${esc(s.name)}</button>`).join("")}
     </div>
     <div class="card" style="padding:6px 10px;">
       ${filtered.length === 0 ? `
@@ -51,7 +51,7 @@ function catchListItemHTML(c) {
   const d = new Date(c.datetime);
   const thumb = c.photos && c.photos[0]
     ? `<img class="list-thumb" src="${c.photos[0]}" alt="">`
-    : `<div class="list-thumb placeholder">${speciesEmoji(c.species)}</div>`;
+    : `<div class="list-thumb placeholder">${speciesIconById(c.species, 26)}</div>`;
   return `
     <div class="list-item catch-list-item" data-id="${c.id}" style="cursor:pointer;">
       ${thumb}
@@ -83,7 +83,7 @@ function openCatchForm(prefillSpotId = null) {
     <div class="field">
       <label>Species</label>
       <div class="species-grid" id="species-grid">
-        ${Species.map((s) => `<button type="button" class="species-btn" data-id="${s.id}"><span class="em">${s.emoji}</span>${esc(s.name)}</button>`).join("")}
+        ${Species.map((s) => `<button type="button" class="species-btn" data-id="${s.id}"><span class="em">${speciesIconHTML(s, 22)}</span>${esc(s.name)}</button>`).join("")}
       </div>
       <input type="text" id="custom-species-input" placeholder="Custom species name" class="hidden" style="margin-top:8px;">
     </div>
@@ -126,7 +126,7 @@ function openCatchForm(prefillSpotId = null) {
       <div style="font-size:13px; line-height:1.5; color:var(--text-primary);">
         📍 ${gps ? gps.lat.toFixed(4) + ", " + gps.lng.toFixed(4) : "Location unavailable"}<br>
         🌊 Tide: ${tide.rising ? "Rising" : "Falling"}, ${tide.currentHeight} m &nbsp; · &nbsp; ${moon.emoji} ${moon.name}<br>
-        📅 ${esc(nakaiy.name)} Nakaiy &nbsp; · &nbsp; ${esc(weather.condition)}, ${weather.windSpeed}kt ${weather.windDir}
+        📅 ${esc(nakaiy.name)} Nakaiy &nbsp; · &nbsp; ${esc(weather.condition)}, ${ktToMph(weather.windSpeed)}mph ${weather.windDir}
       </div>
     </div>
 
@@ -162,7 +162,7 @@ function openCatchForm(prefillSpotId = null) {
       nakaiy: nakaiy.name,
       moon: moon.name,
       weather: weather.condition,
-      wind: `${weather.windSpeed}kt ${weather.windDir}`,
+      wind: `${ktToMph(weather.windSpeed)}mph ${weather.windDir}`,
       photos: [...State.photoBuffer],
       notes: $("#catch-notes").value.trim(),
     };
@@ -219,7 +219,7 @@ function openCatchDetail(catchId) {
 
   const heroHTML = c.photos && c.photos.length
     ? `<img class="catch-hero" src="${c.photos[0]}" alt="">`
-    : `<div class="catch-hero placeholder">${speciesEmoji(c.species)}</div>`;
+    : `<div class="catch-hero placeholder">${speciesIconById(c.species, 56)}</div>`;
 
   openSheet(`
     <div class="sheet-header"><h2>Catch details</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>

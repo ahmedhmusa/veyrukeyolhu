@@ -8,7 +8,7 @@ const Species = [
   { id: "gt", name: "Giant Trevally", emoji: "🐟" },
   { id: "yft", name: "Yellowfin Tuna", emoji: "🐟" },
   { id: "dtt", name: "Dogtooth Tuna", emoji: "🐟" },
-  { id: "rsnap", name: "Red Snapper", emoji: "🐟" },
+  { id: "rsnap", name: "Red Snapper", emoji: "🐟", icon: "icons/species-red-snapper.png" },
   { id: "rubysnap", name: "Ruby Snapper", emoji: "🐟" },
   { id: "grouper", name: "Grouper", emoji: "🐟" },
   { id: "redbass", name: "Red Bass", emoji: "🐟" },
@@ -113,6 +113,10 @@ function getMoonPhase(date = new Date()) {
 // is stable across reloads. Not derived from real harmonic tide
 // station data — clearly presented as an estimate in the UI.
 // ---------------------------------------------------------------
+function ktToMph(kt) {
+  return Math.round(kt * 1.15078);
+}
+
 function seededRandom(seed) {
   let x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
@@ -362,19 +366,19 @@ const SampleCatches = [
     id: "seed-catch-1", species: "gt", customSpecies: "", weight: 18.4, length: 112,
     datetime: Date.now() - 86400000 * 2, lat: 3.4083, lng: 73.4844, spotId: "seed-spot-1",
     technique: "Jigging", lure: "250g knife jig, silver", tide: "Rising", nakaiy: "Rihi",
-    moon: "Waxing Gibbous", weather: "Partly cloudy", wind: "14kt NE", photos: [], notes: "Hit on the drop, second cast at the ledge.",
+    moon: "Waxing Gibbous", weather: "Partly cloudy", wind: "16mph NE", photos: [], notes: "Hit on the drop, second cast at the ledge.",
   },
   {
     id: "seed-catch-2", species: "yft", customSpecies: "", weight: 9.1, length: 74,
     datetime: Date.now() - 86400000 * 6, lat: -0.6301, lng: 73.1069, spotId: "seed-spot-3",
     technique: "Trolling", lure: "Purple/black skirted lure", tide: "Falling", nakaiy: "Burunu",
-    moon: "Full Moon", weather: "Sunny", wind: "9kt E", photos: [], notes: "School was working bait just off the wall.",
+    moon: "Full Moon", weather: "Sunny", wind: "10mph E", photos: [], notes: "School was working bait just off the wall.",
   },
   {
     id: "seed-catch-3", species: "grouper", customSpecies: "", weight: 4.2, length: 48,
     datetime: Date.now() - 86400000 * 11, lat: 3.9702, lng: 72.8306, spotId: "seed-spot-2",
     technique: "Bottom fishing", lure: "Cut bait, squid", tide: "High", nakaiy: "Miya",
-    moon: "Last Quarter", weather: "Clear skies", wind: "11kt SE", photos: [], notes: "",
+    moon: "Last Quarter", weather: "Clear skies", wind: "13mph SE", photos: [], notes: "",
   },
 ];
 
@@ -383,7 +387,7 @@ const SampleTrips = [
     id: "seed-trip-1", name: "Vaavu Channel Morning", date: Date.now() - 86400000 * 2,
     startTime: "05:40", endTime: "10:20", startLocation: "Felidhoo jetty", atoll: "Vaavu Atoll",
     island: "Felidhoo", boat: "Dhoni — Reef Runner", partners: "Ahmed, Ibrahim", targetSpecies: ["gt", "dtt"],
-    technique: "Jigging", weather: "Partly cloudy", seaCondition: "Slight", wind: "14kt NE",
+    technique: "Jigging", weather: "Partly cloudy", seaCondition: "Slight", wind: "16mph NE",
     notes: "Strong current at the channel, two GT landed.", photos: [], catchIds: ["seed-catch-1"], status: "completed",
   },
 ];

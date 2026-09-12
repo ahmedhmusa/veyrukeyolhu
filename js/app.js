@@ -136,8 +136,8 @@ function tryQuickLocation() {
 const ICONS = {
   home: '<path d="M4 11.2 12 4l8 7.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 10v9.3c0 .4.3.7.7.7H10v-5.2h4V20h2.8c.4 0 .7-.3.7-.7V10" stroke-linecap="round" stroke-linejoin="round"/>',
   map: '<path d="M4 6.5 9 4.7l6 1.8 5-1.8v13l-5 1.8-6-1.8-5 1.8Z" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 4.7v13M15 6.5v13" stroke-linecap="round"/>',
-  anchor: '<circle cx="12" cy="5.2" r="1.6"/><path d="M12 6.9v12.6M7.3 12H3.6a8.5 8.5 0 0 0 8.4 7.9 8.5 8.5 0 0 0 8.4-7.9h-3.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.2 11.5h7.6" stroke-linecap="round"/>',
-  fish: '<path d="M3.3 12c3-4.3 8-6.4 12.6-4.2 2 .9 3.6 2.3 4.3 4.2-.7 1.9-2.3 3.3-4.3 4.2C11.3 18.4 6.3 16.3 3.3 12Z" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.4 9.2l2.3-1.8M17.4 14.8l2.3 1.8" stroke-linecap="round"/><circle cx="14.5" cy="10.6" r=".85" fill="currentColor" stroke="none"/>',
+  anchor: '<path d="M4 15.2 Q12 17.6 20 15.2 L17.3 18.7 H6.7 Z" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15.2" x2="12" y2="3.3" stroke-linecap="round"/><path d="M12 4.3 L17.3 13.2 L12 13.2" stroke-linecap="round" stroke-linejoin="round"/>',
+  fish: '<path d="M2.7 12c0-3.3 3.1-5.5 6.6-5.5 3.9 0 6.9 2.1 8.9 5.5-2 3.4-5 5.5-8.9 5.5-3.5 0-6.6-2.2-6.6-5.5Z" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.6 9.7 22 7.2v9.6l-3.4-2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.8 9q-1.1 3 0 6" stroke-linecap="round"/><circle cx="7.6" cy="11" r=".85" fill="currentColor" stroke="none"/>',
   sliders: '<line x1="4" y1="7" x2="20" y2="7" stroke-linecap="round"/><circle cx="9" cy="7" r="2.1" fill="currentColor" stroke="none"/><line x1="4" y1="12.5" x2="20" y2="12.5" stroke-linecap="round"/><circle cx="15" cy="12.5" r="2.1" fill="currentColor" stroke="none"/><line x1="4" y1="18" x2="20" y2="18" stroke-linecap="round"/><circle cx="7" cy="18" r="2.1" fill="currentColor" stroke="none"/>',
   hook: '<path d="M9.2 3.6v7.3a3.3 3.3 0 0 0 6.6 0" stroke-linecap="round"/><circle cx="9.2" cy="3.6" r="1" fill="currentColor" stroke="none"/>',
   pin: '<path d="M12 21s6.5-6.1 6.5-11A6.5 6.5 0 0 0 5.5 10c0 4.9 6.5 11 6.5 11Z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.1"/>',
@@ -155,6 +155,21 @@ const ICONS = {
 function icon(name, size = 20) {
   const body = ICONS[name] || "";
   return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">${body}</svg>`;
+}
+
+// ---------------------------------------------------------------
+// Species icon — uses a custom image if the species defines one
+// (e.g. Red Snapper), otherwise falls back to its emoji.
+// ---------------------------------------------------------------
+function speciesIconHTML(species, size = 20) {
+  if (!species) return "";
+  if (species.icon) {
+    return `<img src="${species.icon}" alt="" style="width:${size}px; height:${size}px; border-radius:${Math.round(size * 0.28)}px; object-fit:cover; display:block;">`;
+  }
+  return `<span style="font-size:${size}px; line-height:1;">${species.emoji}</span>`;
+}
+function speciesIconById(id, size = 20) {
+  return speciesIconHTML(Species.find((s) => s.id === id), size);
 }
 
 // ---------------------------------------------------------------

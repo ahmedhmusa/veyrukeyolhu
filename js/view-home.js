@@ -73,7 +73,7 @@ function renderHome() {
       <div class="grid-2">
         <div class="stat-tile">
           <div class="stat-label">WIND</div>
-          <div class="stat-value">${weather.windSpeed} kt</div>
+          <div class="stat-value">${ktToMph(weather.windSpeed)} mph</div>
           <div class="stat-sub">${weather.windDir}</div>
         </div>
         <div class="stat-tile">
@@ -238,7 +238,7 @@ function openWeatherDetailSheet(weather, now) {
           <div style="font-size:11.5px; color:var(--text-tertiary); font-weight:600;">${h.time}</div>
           <div style="font-size:17px; margin:6px 0 4px;">${h.isNight ? "🌙" : "☀️"}</div>
           <div style="font-family:var(--font-display); font-weight:700; font-size:15px;">${h.temp}°</div>
-          <div style="font-size:10.5px; color:var(--text-tertiary); margin-top:2px;">${h.windSpeed}kt</div>
+          <div style="font-size:10.5px; color:var(--text-tertiary); margin-top:2px;">${ktToMph(h.windSpeed)}mph</div>
         </div>
       `).join("")}
     </div>
@@ -272,7 +272,7 @@ function openWeatherDetailSheet(weather, now) {
       </div>
       <div class="stat-tile">
         <div class="stat-label">WIND</div>
-        <div class="stat-value">${weather.windSpeed} kt</div>
+        <div class="stat-value">${ktToMph(weather.windSpeed)} mph</div>
         <div class="stat-sub">${weather.windDir}</div>
       </div>
       <div class="stat-tile">

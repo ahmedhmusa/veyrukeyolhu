@@ -86,7 +86,7 @@ function bindLiveTripCard(trip) {
   const tide = getTideModel();
   const weather = getWeatherModel();
   $("#live-tide") && ($("#live-tide").textContent = `${tide.rising ? "↑" : "↓"} ${tide.currentHeight}m`);
-  $("#live-wind") && ($("#live-wind").textContent = `${weather.windSpeed}kt ${weather.windDir}`);
+  $("#live-wind") && ($("#live-wind").textContent = `${ktToMph(weather.windSpeed)}mph ${weather.windDir}`);
 
   $("#live-log-catch-btn").addEventListener("click", () => openCatchForm());
   $("#end-trip-btn").addEventListener("click", async () => {
@@ -118,7 +118,7 @@ function openTripForm() {
     <div class="field">
       <label>Target species</label>
       <div class="species-grid" id="trip-species-grid">
-        ${Species.map((s) => `<button type="button" class="species-btn" data-id="${s.id}"><span class="em">${s.emoji}</span>${esc(s.name)}</button>`).join("")}
+        ${Species.map((s) => `<button type="button" class="species-btn" data-id="${s.id}"><span class="em">${speciesIconHTML(s, 22)}</span>${esc(s.name)}</button>`).join("")}
       </div>
     </div>
     <div class="field"><label>Technique</label><select id="trip-technique">${Techniques.map((t) => `<option>${t}</option>`).join("")}</select></div>
@@ -153,7 +153,7 @@ function openTripForm() {
       technique: $("#trip-technique").value,
       weather: weather.condition,
       seaCondition: weather.waveHeight <= 0.8 ? "Calm" : weather.waveHeight <= 1.3 ? "Slight" : "Moderate",
-      wind: `${weather.windSpeed}kt ${weather.windDir}`,
+      wind: `${ktToMph(weather.windSpeed)}mph ${weather.windDir}`,
       notes: $("#trip-notes").value.trim(),
       photos: [],
       catchIds: [],
