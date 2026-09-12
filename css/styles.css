@@ -162,6 +162,7 @@ input, select, textarea { font-family: inherit; }
 
 /* ---------- Typography ---------- */
 .page-header { margin: 6px 0 18px; }
+.page-header.center { text-align: center; }
 .page-header h1 {
   font-family: var(--font-display);
   font-size: 30px;
