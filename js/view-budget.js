@@ -59,7 +59,7 @@ function renderBudget() {
     </div>
 
     <div class="section-title">${filtered.length} expense${filtered.length === 1 ? "" : "s"}</div>
-    <div class="card" style="padding:6px 10px;">
+    <div class="card" id="budget-list-card" style="padding:6px 10px;">
       ${filtered.length === 0 ? `
         <div class="empty-state">
           <div class="icon">${icon("wallet", 34)}</div>
@@ -78,6 +78,14 @@ function renderBudget() {
   }));
   $$(".expense-row").forEach((el) => el.addEventListener("click", () => openExpenseForm(State.expenses.find((e) => e.id === el.dataset.id))));
   $("#empty-add-expense")?.addEventListener("click", () => openExpenseForm());
+
+  initSwipeToDelete($("#budget-list-card"), async (id) => {
+    const exp = State.expenses.find((e) => e.id === id);
+    await dbDelete("expenses", id);
+    await reloadAllData();
+    toast(`Deleted "${exp?.description || "expense"}"`, { icon: icon("check", 14) });
+    renderBudget();
+  });
 }
 
 function expenseListItemHTML(e) {
@@ -85,13 +93,18 @@ function expenseListItemHTML(e) {
   const trip = e.tripId ? State.trips.find((t) => t.id === e.tripId) : null;
   const d = new Date(e.date);
   return `
-    <div class="list-item expense-row" data-id="${e.id}" style="cursor:pointer;">
-      <div class="list-thumb placeholder" style="color:var(--lagoon-deep);">${icon(cat.icon, 22)}</div>
-      <div class="list-main">
-        <div class="list-title">${esc(e.description || cat.name)}</div>
-        <div class="list-sub">${d.toLocaleDateString(undefined, { day: "numeric", month: "short" })}${trip ? " · " + esc(trip.name) : ""}</div>
+    <div class="swipe-row" data-id="${e.id}">
+      <div class="swipe-actions">
+        <button class="swipe-delete-btn" data-id="${e.id}">${icon("x", 15)}<span>Delete</span></button>
       </div>
-      <div style="font-family:var(--font-display); font-weight:700; font-size:15px;">${formatCurrency(e.amount, State.currency)}</div>
+      <div class="swipe-content list-item expense-row" data-id="${e.id}">
+        <div class="list-thumb placeholder" style="color:var(--lagoon-deep);">${icon(cat.icon, 22)}</div>
+        <div class="list-main">
+          <div class="list-title">${esc(e.description || cat.name)}</div>
+          <div class="list-sub">${d.toLocaleDateString(undefined, { day: "numeric", month: "short" })}${trip ? " · " + esc(trip.name) : ""}</div>
+        </div>
+        <div style="font-family:var(--font-display); font-weight:700; font-size:15px;">${formatCurrency(e.amount, State.currency)}</div>
+      </div>
     </div>
   `;
 }

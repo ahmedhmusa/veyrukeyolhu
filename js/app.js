@@ -293,5 +293,101 @@ function closeSheet() {
 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
 
+// ---------------------------------------------------------------
+// Swipe-to-delete — iOS-style: swipe a row left to reveal a Delete
+// button. Works with pointer events (touch + mouse). Attach to any
+// container whose direct list items follow the .swipe-row /
+// .swipe-content / .swipe-actions structure (see expenseListItemHTML
+// for the expected markup).
+// ---------------------------------------------------------------
+const REVEAL_WIDTH = 84;
+
+function initSwipeToDelete(container, onDelete) {
+  if (!container) return;
+  let activeRow = null;
+
+  const closeRow = (row) => {
+    if (!row) return;
+    row.classList.remove("open");
+    const content = row.querySelector(".swipe-content");
+    if (content) content.style.transform = "translateX(0)";
+    if (activeRow === row) activeRow = null;
+  };
+  const openRow = (row) => {
+    if (activeRow && activeRow !== row) closeRow(activeRow);
+    row.classList.add("open");
+    const content = row.querySelector(".swipe-content");
+    if (content) content.style.transform = `translateX(-${REVEAL_WIDTH}px)`;
+    activeRow = row;
+  };
+
+  container.querySelectorAll(".swipe-row").forEach((row) => {
+    const content = row.querySelector(".swipe-content");
+    if (!content) return;
+    let startX = 0, startY = 0, baseX = 0, currentX = 0, decided = null, dragging = false;
+
+    content.addEventListener("pointerdown", (e) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      dragging = true; decided = null;
+      startX = e.clientX; startY = e.clientY;
+      baseX = row.classList.contains("open") ? -REVEAL_WIDTH : 0;
+      content.classList.add("swiping");
+    });
+    content.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (decided === null) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        decided = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+        if (decided === "y") { dragging = false; content.classList.remove("swiping"); return; }
+      }
+      if (decided === "x") {
+        currentX = Math.min(0, Math.max(-REVEAL_WIDTH, baseX + dx));
+        content.style.transform = `translateX(${currentX}px)`;
+      }
+    });
+    const endDrag = () => {
+      if (!dragging) return;
+      dragging = false;
+      content.classList.remove("swiping");
+      if (decided === "x") {
+        row.dataset.justSwiped = "1";
+        if (currentX < -REVEAL_WIDTH / 2) openRow(row); else closeRow(row);
+      }
+      decided = null;
+    };
+    content.addEventListener("pointerup", endDrag);
+    content.addEventListener("pointercancel", endDrag);
+
+    // Suppress the click-through that follows a drag so it doesn't
+    // also trigger the row's normal "open detail" click handler.
+    content.addEventListener("click", (e) => {
+      if (row.dataset.justSwiped === "1") {
+        row.dataset.justSwiped = "";
+        e.stopPropagation();
+        e.preventDefault();
+      } else if (row.classList.contains("open")) {
+        closeRow(row);
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    }, true);
+  });
+
+  container.querySelectorAll(".swipe-delete-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const row = btn.closest(".swipe-row");
+      if (activeRow === row) activeRow = null;
+      onDelete(btn.dataset.id);
+    });
+  });
+
+  document.addEventListener("pointerdown", (e) => {
+    if (activeRow && !activeRow.contains(e.target)) closeRow(activeRow);
+  });
+}
+
 // Kick off
 document.addEventListener("DOMContentLoaded", initApp);
