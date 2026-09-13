@@ -80,7 +80,8 @@ function renderMap() {
   (State.mapLayerType === "satellite" ? [satelliteLayer, satelliteLabels] : [streetLayer]).forEach((l) => l.addTo(map));
   updateMapTint();
 
-  L.control.zoom({ position: "bottomright" }).addTo(map);
+  // No separate zoom +/- control: pinch-to-zoom covers it on touch devices,
+  // and it was competing for space with the locate/layer buttons.
 
   State.mapObj = map;
   State.markerLayer = L.layerGroup().addTo(map);
