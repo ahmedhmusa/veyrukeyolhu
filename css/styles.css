@@ -465,6 +465,22 @@ input, select, textarea { font-family: inherit; }
 }
 :root[data-theme="dark"] .badge { color: var(--lagoon); }
 .badge.gold { background: var(--reef-gold-tint); color: var(--reef-gold); }
+
+.best-spot-pick {
+  display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px 12px;
+  background: var(--surface); border: 1px solid var(--glass-border-soft); border-radius: var(--radius-md);
+  font-size: 13.5px; color: var(--text-primary); cursor: pointer;
+}
+.best-spot-pick-icon { color: var(--lagoon-deep); flex-shrink: 0; display: flex; }
+:root[data-theme="dark"] .best-spot-pick-icon { color: var(--lagoon); }
+.best-spot-pick span:nth-child(2) { flex: 1; }
+.best-spot-rank {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--lagoon-tint); color: var(--lagoon-deep);
+  font-family: var(--font-display); font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+:root[data-theme="dark"] .best-spot-rank { color: var(--lagoon); }
+.best-spot-reasons { display: flex; flex-wrap: wrap; gap: 5px; }
 .badge.coral { background: var(--coral-tint); color: var(--coral); }
 .badge.grass { background: var(--seagrass-tint); color: var(--seagrass); }
 
