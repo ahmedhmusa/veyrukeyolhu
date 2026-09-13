@@ -41,9 +41,9 @@ function renderMap() {
           <button class="chip" id="filter-atoll-btn">Atoll: ${State.mapFilters.atoll === "all" ? "All" : State.mapFilters.atoll.split(" ")[0]}</button>
         </div>
       </div>
-      <button class="map-fab-locate" id="layer-toggle-btn" style="bottom:calc(var(--map-strip-height) + 108px);" title="Toggle satellite view">${icon("globe", 20)}</button>
-      <button class="map-fab-locate" id="locate-btn" style="bottom:calc(var(--map-strip-height) + 54px);">${icon("locate", 20)}</button>
-      <button class="fab" id="drop-pin-fab" style="left:18px; right:auto; bottom:calc(var(--nav-height) + var(--safe-bottom) + var(--map-strip-height) + 42px); background:linear-gradient(160deg, var(--lagoon), var(--lagoon-deep));">
+      <button class="map-fab-locate" id="layer-toggle-btn" style="bottom:calc(var(--map-controls-bottom) + var(--map-strip-height) + 64px);" title="Toggle satellite view">${icon("globe", 20)}</button>
+      <button class="map-fab-locate" id="locate-btn" style="bottom:calc(var(--map-controls-bottom) + var(--map-strip-height) + 10px);">${icon("locate", 20)}</button>
+      <button class="fab" id="drop-pin-fab" style="left:18px; right:auto; bottom:calc(var(--map-controls-bottom) + var(--map-strip-height) + 10px); background:linear-gradient(160deg, var(--lagoon), var(--lagoon-deep));">
         <span class="tab-icon">${icon("plus", 18)}</span>Add Spot
       </button>
       <div class="map-spots-strip" id="map-spots-strip">
