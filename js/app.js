@@ -152,7 +152,18 @@ const ICONS = {
   wifi: '<path d="M2 8.5a15 15 0 0 1 20 0" stroke-linecap="round"/><path d="M5.5 12.3a10 10 0 0 1 13 0" stroke-linecap="round"/><path d="M9 16a5 5 0 0 1 6 0" stroke-linecap="round"/><circle cx="12" cy="19.3" r="1" fill="currentColor" stroke="none"/>',
   globe: '<circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/><line x1="3.5" y1="12" x2="20.5" y2="12" stroke-linecap="round"/><path d="M4.5 7.5h15M4.5 16.5h15" stroke-linecap="round"/>',
 };
+
+// Icons sourced from an image (custom uploads) rendered via a CSS mask
+// so they still adopt currentColor like the hand-drawn SVG icons above.
+const MASK_ICONS = {
+  tripBoat: "./icons/tab-trip-boat.png",
+};
+
 function icon(name, size = 20) {
+  if (MASK_ICONS[name]) {
+    const src = MASK_ICONS[name];
+    return `<span aria-hidden="true" style="display:inline-block; width:${size}px; height:${size}px; background-color:currentColor; -webkit-mask-image:url('${src}'); mask-image:url('${src}'); -webkit-mask-size:contain; mask-size:contain; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center;"></span>`;
+  }
   const body = ICONS[name] || "";
   return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">${body}</svg>`;
 }
@@ -178,7 +189,7 @@ function speciesIconById(id, size = 20) {
 const TABS = [
   { id: "home", label: "Home", icon: "home" },
   { id: "map", label: "Map", icon: "map" },
-  { id: "trips", label: "Trips", icon: "anchor" },
+  { id: "trips", label: "Trips", icon: "tripBoat" },
   { id: "catches", label: "Catches", icon: "fish" },
   { id: "more", label: "More", icon: "sliders" },
 ];
