@@ -481,6 +481,28 @@ input, select, textarea { font-family: inherit; }
   padding: 12px 4px; border-bottom: 1px solid var(--border);
 }
 .list-item:last-child { border-bottom: none; }
+
+/* ---------- Swipe-to-delete ---------- */
+.swipe-row { position: relative; overflow: hidden; }
+.swipe-row .swipe-content { border-bottom: 1px solid var(--border); }
+.swipe-row:last-child .swipe-content { border-bottom: none; }
+.swipe-actions {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 84px;
+  display: flex; z-index: 0;
+}
+.swipe-delete-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: var(--coral); color: white; border: none; font-size: 11px; font-weight: 700;
+}
+:root[data-theme="dark"] .swipe-delete-btn { background: #B33A2E; color: white; }
+.swipe-content {
+  position: relative; z-index: 1; background: var(--bg-elevated);
+  transition: transform 0.28s cubic-bezier(.22,.61,.36,1);
+  touch-action: pan-y;
+  cursor: pointer;
+}
+.swipe-content.swiping { transition: none; }
+
 .list-thumb {
   width: 52px; height: 52px; border-radius: var(--radius-sm); object-fit: cover;
   background: var(--lagoon-tint); flex-shrink: 0;
