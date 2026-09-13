@@ -25,6 +25,7 @@ function divIconFor(spot) {
 }
 
 function renderMap() {
+  const filteredSpots = getFilteredSpots();
   root().innerHTML = `
     <div class="map-wrap">
       <div id="map-canvas"></div>
@@ -32,6 +33,7 @@ function renderMap() {
         <div class="map-search">
           <span>${icon("search", 17)}</span>
           <input type="text" id="map-search-input" placeholder="Search spots, atolls, islands...">
+          <button class="map-legend-icon-btn" id="legend-btn" title="Legend">${icon("layers", 16)}</button>
         </div>
         <div class="chip-row" id="map-filter-row" style="padding-bottom:0;">
           <button class="chip ${State.mapFilters.favouriteOnly ? "active" : ""}" id="filter-fav" style="display:inline-flex; align-items:center; gap:5px;">${icon("star", 14)} Favourites</button>
@@ -39,27 +41,35 @@ function renderMap() {
           <button class="chip" id="filter-atoll-btn">Atoll: ${State.mapFilters.atoll === "all" ? "All" : State.mapFilters.atoll.split(" ")[0]}</button>
         </div>
       </div>
-      <button class="btn btn-secondary map-legend-sheet-btn" id="legend-btn" style="border-radius:999px; padding:10px 14px; display:inline-flex; align-items:center; gap:6px;">${icon("layers", 16)} Legend</button>
-      <button class="map-fab-locate" id="layer-toggle-btn" style="bottom:150px;" title="Toggle satellite view">${icon("globe", 20)}</button>
-      <button class="map-fab-locate" id="locate-btn">${icon("locate", 20)}</button>
-      <button class="fab" id="drop-pin-fab" style="left:14px; right:auto; bottom:calc(var(--nav-height) + var(--safe-bottom) + 28px); background:linear-gradient(160deg, var(--lagoon), var(--lagoon-deep));">
+      <button class="map-fab-locate" id="layer-toggle-btn" style="bottom:calc(var(--map-strip-height) + 108px);" title="Toggle satellite view">${icon("globe", 20)}</button>
+      <button class="map-fab-locate" id="locate-btn" style="bottom:calc(var(--map-strip-height) + 54px);">${icon("locate", 20)}</button>
+      <button class="fab" id="drop-pin-fab" style="left:18px; right:auto; bottom:calc(var(--nav-height) + var(--safe-bottom) + var(--map-strip-height) + 42px); background:linear-gradient(160deg, var(--lagoon), var(--lagoon-deep));">
         <span class="tab-icon">${icon("plus", 18)}</span>Add Spot
       </button>
+      <div class="map-spots-strip" id="map-spots-strip">
+        ${filteredSpots.length === 0 ? `
+          <div class="map-spot-card map-spot-card-empty">
+            <div class="map-spot-card-empty-icon">${icon("pin", 20)}</div>
+            <div class="map-spot-card-empty-text">No spots saved yet — tap "Add Spot" to drop your first pin</div>
+          </div>
+        ` : filteredSpots.map((s) => mapSpotCardHTML(s)).join("")}
+      </div>
     </div>
   `;
 
   const startCenter = State.gps || DEFAULT_LOCATION;
-  const map = L.map("map-canvas", { zoomControl: false, attributionControl: true }).setView(
+  const map = L.map("map-canvas", { zoomControl: false, attributionControl: false }).setView(
     [startCenter.lat, startCenter.lng], State.gps ? 12 : 7
   );
+  L.control.attribution({ position: "topright", prefix: false }).addTo(map);
 
   const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution: "OpenStreetMap",
   });
   const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
     maxZoom: 19,
-    attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics",
+    attribution: "Esri, Maxar",
   });
   const satelliteLabels = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
     maxZoom: 19,
@@ -68,6 +78,7 @@ function renderMap() {
   State.baseLayers = { street: streetLayer, satellite: satelliteLayer, satelliteLabels };
 
   (State.mapLayerType === "satellite" ? [satelliteLayer, satelliteLabels] : [streetLayer]).forEach((l) => l.addTo(map));
+  updateMapTint();
 
   L.control.zoom({ position: "bottomright" }).addTo(map);
 
@@ -103,6 +114,7 @@ function renderMap() {
       State.mapLayerType = "satellite";
       toast("Satellite view");
     }
+    updateMapTint();
     await setSetting("mapLayerType", State.mapLayerType);
   });
 
@@ -128,6 +140,14 @@ function renderMap() {
   $("#filter-atoll-btn").addEventListener("click", () => openMapFilterSheet("atoll"));
   $("#legend-btn").addEventListener("click", openLegendSheet);
 
+  $$(".map-spot-card[data-id]").forEach((card) => card.addEventListener("click", () => {
+    const spot = State.spots.find((s) => s.id === card.dataset.id);
+    if (!spot) return;
+    map.setView([spot.lat, spot.lng], 14);
+    const marker = State.spotMarkers?.[spot.id];
+    if (marker) marker.openPopup();
+  }));
+
   $("#map-search-input").addEventListener("input", (e) => {
     const q = e.target.value.trim().toLowerCase();
     if (!q) { drawSpotMarkers(); return; }
@@ -137,6 +157,34 @@ function renderMap() {
     drawSpotMarkers(matches);
     if (matches.length === 1) map.setView([matches[0].lat, matches[0].lng], 14);
   });
+}
+
+// Tints the OSM street tiles toward the app's ocean palette so the map
+// doesn't look like a bare, generic embed. Satellite imagery is left
+// untouched since filtering photo tiles looks bad.
+function updateMapTint() {
+  const canvas = $("#map-canvas");
+  if (!canvas) return;
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark"
+    || (State.theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  if (State.mapLayerType === "satellite") {
+    canvas.style.filter = isDark ? "brightness(0.82) saturate(1.05)" : "none";
+    return;
+  }
+  canvas.style.filter = isDark
+    ? "invert(1) hue-rotate(185deg) brightness(0.95) contrast(0.9) saturate(0.9)"
+    : "saturate(1.15) hue-rotate(-4deg) brightness(1.02)";
+}
+
+function mapSpotCardHTML(s) {
+  const speciesTxt = (s.targetSpecies || []).slice(0, 2).map((id) => speciesLabel(id, "")).join(", ");
+  return `
+    <div class="map-spot-card" data-id="${s.id}">
+      <div class="map-spot-card-icon" style="background:${s.favourite ? "#C8933F" : "#A62E39"};">${s.favourite ? icon("star", 15) : icon("pin", 15)}</div>
+      <div class="map-spot-card-name">${esc(s.name)}</div>
+      <div class="map-spot-card-meta">${esc(s.atoll.split(" ")[0])}${speciesTxt ? " · " + esc(speciesTxt) : ""}</div>
+    </div>
+  `;
 }
 
 function getFilteredSpots() {
@@ -151,12 +199,14 @@ function getFilteredSpots() {
 function drawSpotMarkers(customList = null) {
   if (!State.markerLayer) return;
   State.markerLayer.clearLayers();
+  State.spotMarkers = {};
   const list = customList || getFilteredSpots();
   list.forEach((spot) => {
     const marker = L.marker([spot.lat, spot.lng], { icon: divIconFor(spot) });
     marker.bindPopup(spotPopupHTML(spot));
     marker.on("popupopen", () => bindSpotPopupActions(spot.id));
     marker.addTo(State.markerLayer);
+    State.spotMarkers[spot.id] = marker;
   });
 }
 
