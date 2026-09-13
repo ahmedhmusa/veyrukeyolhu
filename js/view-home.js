@@ -38,14 +38,26 @@ function tierColorVar(tagClass) {
   return "var(--lagoon-deep)";
 }
 
-function buildScoreCurveSVG(points, nowHours) {
-  const w = 320, h = 90, pad = 4;
-  const minS = 0, maxS = 100;
-  const toX = (hh) => pad + (hh / 24) * (w - pad * 2);
-  const toY = (val) => h - pad - ((val - minS) / (maxS - minS)) * (h - pad * 2);
+function buildScoreCurveSVG(points, nowHours, windows = []) {
+  const w = 340, h = 150;
+  const padL = 30, padR = 8, padT = 16, padB = 26;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  // Auto-scale to the day's actual range (with headroom) so the curve's
+  // shape stays readable instead of flattening against the top or bottom.
+  const scores = points.map((p) => p.score);
+  const dataMin = Math.min(...scores);
+  const dataMax = Math.max(...scores);
+  const span = Math.max(dataMax - dataMin, 12);
+  const yMin = Math.max(0, dataMin - span * 0.45);
+  const yMax = Math.min(100, dataMax + span * 0.45);
+
+  const toX = (hh) => padL + (hh / 24) * plotW;
+  const toY = (val) => padT + plotH - ((val - yMin) / (yMax - yMin)) * plotH;
 
   const path = points.map((p, i) => `${i === 0 ? "M" : "L"}${toX(p.h).toFixed(1)},${toY(p.score).toFixed(1)}`).join(" ");
-  const areaPath = `${path} L${toX(24).toFixed(1)},${h} L${toX(0).toFixed(1)},${h} Z`;
+  const areaPath = `${path} L${toX(24).toFixed(1)},${padT + plotH} L${toX(0).toFixed(1)},${padT + plotH} Z`;
 
   const stops = points.filter((_, i) => i % 2 === 0).map((p) =>
     `<stop offset="${((p.h / 24) * 100).toFixed(1)}%" stop-color="${tierColorVar(p.tagClass)}"/>`
@@ -55,37 +67,86 @@ function buildScoreCurveSVG(points, nowHours) {
   const nowScore = points.reduce((closest, p) => Math.abs(p.h - clampedNow) < Math.abs(closest.h - clampedNow) ? p : closest, points[0]);
   const nowX = toX(clampedNow);
   const nowY = toY(nowScore.score);
+  const nowLabel = (() => {
+    const d = new Date();
+    d.setHours(Math.floor(clampedNow), Math.round((clampedNow % 1) * 60), 0, 0);
+    return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  })();
+
+  // Band gridlines at the real tier thresholds, only where visible
+  const bands = [
+    { val: 75, label: "HIGH" },
+    { val: 55, label: "MED" },
+  ].filter((b) => b.val > yMin + 2 && b.val < yMax - 2);
+  const bandMarkup = bands.map((b) => `
+    <line x1="${padL}" y1="${toY(b.val).toFixed(1)}" x2="${w - padR}" y2="${toY(b.val).toFixed(1)}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,4" opacity="0.7"/>
+    <text x="4" y="${(toY(b.val) + 3.5).toFixed(1)}" font-size="8.5" font-weight="700" fill="var(--text-tertiary)" letter-spacing="0.04em">${b.label}</text>
+  `).join("");
+
+  // Highlighted major (peak) windows, like the reference app's shaded columns
+  const windowMarkup = windows.filter((wd) => wd.kind === "major").map((wd) => {
+    const x = toX(wd.startH);
+    const width = toX(wd.endH) - x;
+    return `<rect x="${x.toFixed(1)}" y="${padT}" width="${Math.max(width, 1).toFixed(1)}" height="${plotH}" fill="var(--seagrass)" opacity="0.14" rx="3"/>`;
+  }).join("");
+
+  const hourLabels = [4, 8, 12, 16, 20].map((hh) =>
+    `<text x="${toX(hh).toFixed(1)}" y="${h - 8}" font-size="9" fill="var(--text-tertiary)" text-anchor="middle" font-weight="600">${String(hh).padStart(2, "0")}:00</text>`
+  ).join("");
 
   return `
-  <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+  <svg viewBox="0 0 ${w} ${h}" width="100%" style="display:block;">
     <defs>
-      <linearGradient id="scoreLineGrad" x1="0" y1="0" x2="1" y2="0">
-        ${stops}
-      </linearGradient>
+      <linearGradient id="scoreLineGrad" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient>
       <linearGradient id="scoreAreaGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="${tierColorVar(nowScore.tagClass)}" stop-opacity="0.30"/>
+        <stop offset="0%" stop-color="${tierColorVar(nowScore.tagClass)}" stop-opacity="0.28"/>
         <stop offset="100%" stop-color="${tierColorVar(nowScore.tagClass)}" stop-opacity="0.02"/>
       </linearGradient>
     </defs>
+    ${windowMarkup}
+    ${bandMarkup}
     <path d="${areaPath}" fill="url(#scoreAreaGrad)" stroke="none"/>
     <path d="${path}" fill="none" stroke="url(#scoreLineGrad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="${nowX.toFixed(1)}" y1="${padT}" x2="${nowX.toFixed(1)}" y2="${padT + plotH}" stroke="var(--text-tertiary)" stroke-width="1" opacity="0.5"/>
     <circle cx="${nowX.toFixed(1)}" cy="${nowY.toFixed(1)}" r="4.5" fill="${tierColorVar(nowScore.tagClass)}"/>
     <circle cx="${nowX.toFixed(1)}" cy="${nowY.toFixed(1)}" r="8" fill="${tierColorVar(nowScore.tagClass)}" opacity="0.22"/>
+    <rect x="${(nowX - 20).toFixed(1)}" y="1" width="40" height="14" rx="7" fill="var(--surface-solid)" stroke="var(--glass-border-soft)"/>
+    <text x="${nowX.toFixed(1)}" y="11" font-size="8.5" font-weight="700" fill="var(--text-primary)" text-anchor="middle">${nowLabel}</text>
+    ${hourLabels}
   </svg>`;
 }
 
 function buildScoreGaugeSVG(score, tagClass) {
-  const r = 50, cx = 60, cy = 60;
-  const circumference = 2 * Math.PI * r;
-  const offset = circumference * (1 - score / 100);
+  const cx = 70, cy = 70;
+  const rOuter = 60, rInner = 48;
   const color = tierColorVar(tagClass);
-  return `
-  <svg viewBox="0 0 120 120" width="128" height="128">
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="10"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="10"
-      stroke-linecap="round" stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
-      transform="rotate(-90 ${cx} ${cy})" style="transition: stroke-dashoffset 0.6s cubic-bezier(.22,.61,.36,1);"/>
-  </svg>`;
+  const totalTicks = 72;
+  const activeTicks = Math.round((score / 100) * totalTicks);
+  // Leave a gap at the bottom so the dial reads as a gauge, not a full ring
+  const startAngle = 130, sweep = 280;
+
+  let ticks = "";
+  for (let i = 0; i < totalTicks; i++) {
+    const angle = startAngle + (i / (totalTicks - 1)) * sweep;
+    const rad = (angle * Math.PI) / 180;
+    const x1 = cx + rInner * Math.cos(rad);
+    const y1 = cy + rInner * Math.sin(rad);
+    const x2 = cx + rOuter * Math.cos(rad);
+    const y2 = cy + rOuter * Math.sin(rad);
+    const on = i < activeTicks;
+    ticks += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${on ? color : "var(--border)"}" stroke-width="${on ? 2.6 : 2}" stroke-linecap="round" opacity="${on ? 1 : 0.55}"/>`;
+  }
+  return `<svg viewBox="0 0 140 140" width="150" height="150">${ticks}</svg>`;
+}
+
+function buildStarRating(score, tagClass) {
+  const stars = score >= 75 ? 3 : score >= 55 ? 2 : 1;
+  const color = tierColorVar(tagClass);
+  let out = "";
+  for (let i = 0; i < 3; i++) {
+    out += `<svg viewBox="0 0 24 24" width="13" height="13" fill="${i < stars ? color : "var(--border)"}" style="margin:0 1px;"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.9l-5.3 2.8 1.1-5.9L3.5 9.7l5.9-.8Z"/></svg>`;
+  }
+  return out;
 }
 
 function renderHome() {
@@ -115,14 +176,13 @@ function renderHome() {
       <div class="score-gauge-wrap">
         ${buildScoreGaugeSVG(score.score, score.tagClass)}
         <div class="score-gauge-center">
-          <span class="score-value ${score.tagClass}">${score.score}%</span>
+          <span class="score-value ${score.tagClass}">${score.score}</span>
+          <div class="score-stars">${buildStarRating(score.score, score.tagClass)}</div>
         </div>
       </div>
-      <div style="text-align:center;">
-        <span class="score-tag ${score.tagClass}">${score.tag}</span>
-      </div>
+      <div class="score-headline ${score.tagClass}">${score.tag === "Excellent" ? "High" : score.tag === "Moderate" ? "Moderate" : "Low"} fish activity</div>
       <div class="score-note" style="text-align:center;">${esc(reco)}</div>
-      <div class="tide-curve-wrap" style="margin-top:14px;">${buildScoreCurveSVG(scoreCurve, tide.nowHours)}</div>
+      <div class="tide-curve-wrap" style="margin-top:14px;">${buildScoreCurveSVG(scoreCurve, tide.nowHours, timeWindows)}</div>
       ${timeWindows.length ? `
         <div class="time-windows-row">
           <div class="time-windows-col">
