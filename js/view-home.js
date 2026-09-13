@@ -260,7 +260,7 @@ function openTideDetailSheet(now) {
   });
 
   openSheet(`
-    <div class="sheet-header"><h2>Tide forecast</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>Tide forecast</h2></div>
 
     <div class="tide-curve-wrap" style="margin-bottom:6px;">${buildExtendedTideCurveSVG(forecast)}</div>
     <div class="score-disclaimer" style="margin-bottom:16px;">3-day estimate from the same M2-period model as the Home tide card — not from a live tide station.</div>
@@ -283,7 +283,6 @@ function openTideDetailSheet(now) {
     <a href="https://www.surf-forecast.com/breaks/Male/tides/latest" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="margin-top:16px; text-decoration:none;">View live tide station data ↗</a>
   `, { tall: true });
 
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
 }
 
 async function loadNakaiyPersonalNote(nakaiyName) {
@@ -300,7 +299,7 @@ function openWeatherDetailSheet(weather, now) {
   const uvLabel = weather.uvIndex >= 8 ? "Very high" : weather.uvIndex >= 6 ? "High" : weather.uvIndex >= 3 ? "Moderate" : "Low";
 
   openSheet(`
-    <div class="sheet-header"><h2>Weather detail</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>Weather detail</h2></div>
 
     <div class="card-row" style="margin-bottom:14px;">
       <div class="card-title" style="font-size:17px;"><span class="emoji">☀️</span>${esc(weather.condition)}</div>
@@ -361,21 +360,19 @@ function openWeatherDetailSheet(weather, now) {
     <div class="score-disclaimer" style="margin-top:14px;">Estimated, personal-reference weather model — not a connected marine forecast. Always check official sources before heading out.</div>
   `, { tall: true });
 
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
 }
 
 function openNakaiyNoteEditor(nakaiyName) {
   getSetting("nakaiyNotes", {}).then((notes) => {
     const existing = notes[nakaiyName] || "";
     openSheet(`
-      <div class="sheet-header"><h2>Notes for ${esc(nakaiyName)}</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+      <div class="sheet-header"><h2>Notes for ${esc(nakaiyName)}</h2></div>
       <div class="field">
         <label>Your personal fishing notes</label>
         <textarea id="nakaiy-note-input" placeholder="e.g. Best GT bite I've had was during this Nakaiy at the channel mouth...">${esc(existing)}</textarea>
       </div>
       <button class="btn btn-primary btn-block" id="save-nakaiy-note">Save note</button>
     `);
-    $("#sheet-close-btn").addEventListener("click", closeSheet);
     $("#save-nakaiy-note").addEventListener("click", async () => {
       const val = $("#nakaiy-note-input").value.trim();
       const all = await getSetting("nakaiyNotes", {});

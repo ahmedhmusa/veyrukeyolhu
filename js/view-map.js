@@ -204,7 +204,7 @@ function openSpotForm(spot = {}) {
   State.photoBuffer = spot.photos ? [...spot.photos] : [];
 
   openSheet(`
-    <div class="sheet-header"><h2>${isEdit ? "Edit Spot" : "New Fishing Spot"}</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>${isEdit ? "Edit Spot" : "New Fishing Spot"}</h2></div>
 
     <div class="field"><label>Spot name</label><input type="text" id="spot-name" value="${esc(spot.name || "")}" placeholder="e.g. Channel Drop-off"></div>
 
@@ -234,7 +234,7 @@ function openSpotForm(spot = {}) {
     <div class="field">
       <label>Target species</label>
       <div class="species-grid" id="spot-species-grid">
-        ${Species.map((s) => `<button type="button" class="species-btn ${((spot.targetSpecies || []).includes(s.id)) ? "active" : ""}" data-id="${s.id}"><span class="em">${s.emoji}</span>${esc(s.name)}</button>`).join("")}
+        ${Species.map((s) => `<button type="button" class="species-btn ${((spot.targetSpecies || []).includes(s.id)) ? "active" : ""}" data-id="${s.id}"><span class="em">${speciesIconHTML(s, 22)}</span>${esc(s.name)}</button>`).join("")}
       </div>
     </div>
 
@@ -266,7 +266,6 @@ function openSpotForm(spot = {}) {
     </div>
   `, { tall: true });
 
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
   $("#spot-photo-input").addEventListener("change", (e) => handlePhotoInput(e, "#spot-photo-picker"));
   $("#spot-fav-toggle").addEventListener("click", (e) => e.target.classList.toggle("on"));
   $$("#spot-species-grid .species-btn").forEach((btn) => btn.addEventListener("click", () => btn.classList.toggle("active")));
@@ -316,7 +315,7 @@ function openSpotDetail(spotId) {
   if (!spot) return;
   const catches = State.catches.filter((c) => c.spotId === spotId);
   openSheet(`
-    <div class="sheet-header"><h2>${esc(spot.name)}</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>${esc(spot.name)}</h2></div>
     ${spot.photos && spot.photos.length ? `<img class="catch-hero" src="${spot.photos[0]}" style="margin-bottom:14px;">` : ""}
     <div class="detail-row"><span class="k">Atoll</span><span class="v">${esc(spot.atoll)}</span></div>
     <div class="detail-row"><span class="k">Island / area</span><span class="v">${esc(spot.island || "—")}</span></div>
@@ -333,7 +332,6 @@ function openSpotDetail(spotId) {
       <button class="btn btn-primary btn-block" id="log-catch-here-btn">🎣 Log Catch</button>
     </div>
   `, { tall: true });
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
   $("#edit-spot-btn").addEventListener("click", () => openSpotForm(spot));
   $("#log-catch-here-btn").addEventListener("click", () => openCatchForm(spot.id));
 }
@@ -342,14 +340,13 @@ function openMapFilterSheet(kind) {
   const isSpecies = kind === "species";
   const options = isSpecies ? [{ id: "all", name: "All species" }, ...Species] : ["all", ...Atolls];
   openSheet(`
-    <div class="sheet-header"><h2>Filter by ${isSpecies ? "species" : "atoll"}</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>Filter by ${isSpecies ? "species" : "atoll"}</h2></div>
     <div class="chip-row" style="flex-wrap:wrap; overflow:visible;" id="filter-options">
       ${isSpecies
         ? options.map((o) => `<button class="chip ${State.mapFilters.species === o.id ? "active" : ""}" data-val="${o.id}">${o.emoji || ""} ${esc(o.name)}</button>`).join("")
         : options.map((o) => `<button class="chip ${State.mapFilters.atoll === o ? "active" : ""}" data-val="${o}">${esc(o === "all" ? "All atolls" : o)}</button>`).join("")}
     </div>
   `);
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
   $$("#filter-options .chip").forEach((chip) => chip.addEventListener("click", () => {
     if (isSpecies) State.mapFilters.species = chip.dataset.val;
     else State.mapFilters.atoll = chip.dataset.val;
@@ -360,11 +357,10 @@ function openMapFilterSheet(kind) {
 
 function openLegendSheet() {
   openSheet(`
-    <div class="sheet-header"><h2>Map legend</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>Map legend</h2></div>
     <div class="detail-row"><span class="k" style="display:inline-flex; align-items:center; gap:6px;">${icon("star", 15)} Gold marker</span><span class="v">Favourite spot</span></div>
     <div class="detail-row"><span class="k" style="display:inline-flex; align-items:center; gap:6px;">${icon("pin", 15)} Red marker</span><span class="v">General fishing spot</span></div>
     <div class="detail-row"><span class="k">Red dot</span><span class="v">Your current location</span></div>
     <div class="field-hint" style="margin-top:10px;">Tap any marker for quick details, or "Add Spot" then tap the map to drop a pin.</div>
   `);
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
 }

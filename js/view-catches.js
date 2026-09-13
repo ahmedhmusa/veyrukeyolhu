@@ -78,7 +78,7 @@ function openCatchForm(prefillSpotId = null) {
   const gps = State.gps;
 
   openSheet(`
-    <div class="sheet-header"><h2>Log Catch</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>Log Catch</h2></div>
 
     <div class="field">
       <label>Species</label>
@@ -141,7 +141,6 @@ function openCatchForm(prefillSpotId = null) {
     $("#custom-species-input").classList.toggle("hidden", selectedSpecies !== "other");
   }));
 
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
   $("#photo-input").addEventListener("change", (e) => handlePhotoInput(e, "#photo-picker"));
 
   $("#save-catch-btn").addEventListener("click", async () => {
@@ -222,7 +221,7 @@ function openCatchDetail(catchId) {
     : `<div class="catch-hero placeholder">${speciesIconById(c.species, 56)}</div>`;
 
   openSheet(`
-    <div class="sheet-header"><h2>Catch details</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>Catch details</h2></div>
     ${heroHTML}
     ${c.photos && c.photos.length > 1 ? `
       <div class="photo-picker" style="margin-top:8px;">
@@ -257,7 +256,6 @@ function openCatchDetail(catchId) {
     </div>
   `, { tall: true });
 
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
   $("#delete-catch-btn").addEventListener("click", async () => {
     if (!confirm("Delete this catch? This can't be undone.")) return;
     await dbDelete("catches", c.id);

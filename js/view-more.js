@@ -117,11 +117,10 @@ function renderMore() {
 
 function openNameEditor() {
   openSheet(`
-    <div class="sheet-header"><h2>Your name</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>Your name</h2></div>
     <div class="field"><input type="text" id="name-input" value="${esc(State.userName)}" placeholder="Your name"></div>
     <button class="btn btn-primary btn-block" id="save-name-btn">Save</button>
   `);
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
   $("#save-name-btn").addEventListener("click", async () => {
     const val = $("#name-input").value.trim() || "Angler";
     State.userName = val;
@@ -133,13 +132,12 @@ function openNameEditor() {
 
 function openSyncInfoSheet() {
   openSheet(`
-    <div class="sheet-header"><h2>Cloud sync</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>Cloud sync</h2></div>
     <div style="font-size:14px; line-height:1.55; color:var(--text-primary);">
       This build of VeyruKeyolhu stores everything locally on your device using IndexedDB, so it works fully offline on the boat — nothing disappears if you lose signal.<br><br>
       It is not yet connected to a cloud backend, so catches, trips and spots won't automatically appear on a second device. Use <b>Export backup</b> in the Backup section to save a copy you can move to another device or restore later.
     </div>
   `);
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
 }
 
 async function exportBackup() {

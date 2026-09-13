@@ -104,7 +104,7 @@ function bindLiveTripCard(trip) {
 
 function openTripForm() {
   openSheet(`
-    <div class="sheet-header"><h2>New Trip</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>New Trip</h2></div>
     <div class="field"><label>Trip name</label><input type="text" id="trip-name" placeholder="e.g. Vaavu Channel Morning"></div>
     <div class="field-row">
       <div class="field"><label>Atoll</label><select id="trip-atoll">${Atolls.map((a) => `<option>${a}</option>`).join("")}</select></div>
@@ -127,7 +127,6 @@ function openTripForm() {
     <button class="btn btn-primary btn-block" id="start-trip-btn">Start Trip</button>
   `, { tall: true });
 
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
   $$("#trip-species-grid .species-btn").forEach((btn) => btn.addEventListener("click", () => btn.classList.toggle("active")));
 
   $("#start-trip-btn").addEventListener("click", async () => {
@@ -179,7 +178,7 @@ function openTripDetail(tripId) {
   const d = new Date(trip.date);
 
   openSheet(`
-    <div class="sheet-header"><h2>${esc(trip.name)}</h2><button class="sheet-close" id="sheet-close-btn">✕</button></div>
+    <div class="sheet-header"><h2>${esc(trip.name)}</h2></div>
     <div class="detail-row"><span class="k">Date</span><span class="v">${d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</span></div>
     <div class="detail-row"><span class="k">Time</span><span class="v">${esc(trip.startTime || "—")}${trip.endTime ? " – " + esc(trip.endTime) : ""}</span></div>
     <div class="detail-row"><span class="k">Location</span><span class="v">${esc(trip.island || trip.atoll || "—")}</span></div>
@@ -200,7 +199,6 @@ function openTripDetail(tripId) {
     ${trip.status !== "active" ? `<button class="btn btn-danger btn-block" id="delete-trip-btn" style="margin-top:14px;">Delete Trip</button>` : ""}
   `, { tall: true });
 
-  $("#sheet-close-btn").addEventListener("click", closeSheet);
   $$(".catch-list-item").forEach((el) => el.addEventListener("click", () => openCatchDetail(el.dataset.id)));
   $("#delete-trip-btn")?.addEventListener("click", async () => {
     if (!confirm("Delete this trip? Catches logged on it will be kept.")) return;

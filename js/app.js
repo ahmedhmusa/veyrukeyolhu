@@ -151,6 +151,7 @@ const ICONS = {
   check: '<path d="M4.5 12.5 9 17l10.5-11" stroke-linecap="round" stroke-linejoin="round"/>',
   wifi: '<path d="M2 8.5a15 15 0 0 1 20 0" stroke-linecap="round"/><path d="M5.5 12.3a10 10 0 0 1 13 0" stroke-linecap="round"/><path d="M9 16a5 5 0 0 1 6 0" stroke-linecap="round"/><circle cx="12" cy="19.3" r="1" fill="currentColor" stroke="none"/>',
   globe: '<circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/><line x1="3.5" y1="12" x2="20.5" y2="12" stroke-linecap="round"/><path d="M4.5 7.5h15M4.5 16.5h15" stroke-linecap="round"/>',
+  x: '<line x1="5" y1="5" x2="19" y2="19" stroke-linecap="round"/><line x1="19" y1="5" x2="5" y2="19" stroke-linecap="round"/>',
 };
 
 // Icons sourced from an image (custom uploads) rendered via a CSS mask
@@ -236,18 +237,13 @@ window.addEventListener("hashchange", () => navigate(location.hash.replace("#", 
 // ---------------------------------------------------------------
 function openSheet(innerHTML, { tall = false, onClose = null } = {}) {
   const sheetRoot = $("#sheet-root");
-  const headerMatch = innerHTML.match(/^\s*<div class="sheet-header">[\s\S]*?<\/div>\s*/);
-  const headerHTML = headerMatch ? headerMatch[0] : "";
-  const restHTML = headerMatch ? innerHTML.slice(headerMatch[0].length) : innerHTML;
   sheetRoot.innerHTML = `
     <div class="sheet-overlay" id="active-sheet-overlay">
       <div class="sheet ${tall ? "sheet-tall" : ""}" id="active-sheet">
-        <div class="sheet-sticky-bar">
-          <div class="sheet-handle"></div>
-          ${headerHTML}
-        </div>
-        <div class="sheet-body">${restHTML}</div>
+        <div class="sheet-handle"></div>
+        <div class="sheet-body">${innerHTML}</div>
       </div>
+      <button class="sheet-float-close" id="sheet-float-close-btn" aria-label="Close">${icon("x", 18)}</button>
     </div>
   `;
   const overlay = $("#active-sheet-overlay");
@@ -255,6 +251,7 @@ function openSheet(innerHTML, { tall = false, onClose = null } = {}) {
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeSheet();
   });
+  $("#sheet-float-close-btn").addEventListener("click", closeSheet);
   overlay._onClose = onClose;
   return overlay;
 }
