@@ -272,6 +272,22 @@ input, select, textarea { font-family: inherit; }
 .score-value.gold { color: var(--reef-gold); }
 .score-value.slow { color: var(--lagoon-deep); }
 :root[data-theme="dark"] .score-value.slow { color: var(--lagoon); }
+
+.score-gauge-wrap { position: relative; width: 128px; height: 128px; margin: 10px auto 4px; }
+.score-gauge-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.score-gauge-center .score-value { font-size: 32px; }
+
+.time-windows-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.time-windows-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 6px; }
+.time-windows-label.grass { color: var(--seagrass); }
+.time-windows-label.gold { color: var(--reef-gold); }
+.time-window-chip {
+  font-size: 12.5px; font-weight: 650; padding: 6px 10px; border-radius: var(--radius-sm);
+  margin-bottom: 5px; background: var(--surface); border: 1px solid var(--glass-border-soft);
+}
+.time-window-chip.grass { color: var(--seagrass); }
+.time-window-chip.gold { color: var(--reef-gold); }
+.time-window-chip.empty { color: var(--text-tertiary); font-weight: 500; }
 .score-tag {
   font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: var(--radius-pill);
   background: var(--seagrass-tint); color: var(--seagrass);
