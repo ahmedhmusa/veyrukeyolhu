@@ -7,7 +7,7 @@ function renderTrips() {
   if (activeTrip) State.activeTripId = activeTrip.id;
 
   root().innerHTML = `
-    <div class="page-header">
+    <div class="page-header center">
       <h1>Trips</h1>
       <p>${State.trips.length} trip${State.trips.length === 1 ? "" : "s"} logged</p>
     </div>
@@ -17,7 +17,7 @@ function renderTrips() {
     `}
 
     <div class="section-title">${activeTrip ? "Past trips" : "All trips"}</div>
-    <div class="card" style="padding:6px 10px;">
+    <div class="card ${State.trips.filter((t) => t.id !== activeTrip?.id).length === 0 ? "fill-remaining" : ""}" style="padding:6px 10px;">
       ${State.trips.filter((t) => t.id !== activeTrip?.id).length === 0 ? `
         <div class="empty-state">
           <div class="icon">🎣</div>
@@ -26,7 +26,7 @@ function renderTrips() {
         </div>
       ` : State.trips.filter((t) => t.id !== activeTrip?.id).map((t) => tripListItemHTML(t)).join("")}
     </div>
-    <div class="spacer-lg"></div>
+    ${State.trips.filter((t) => t.id !== activeTrip?.id).length > 0 ? `<div class="spacer-lg"></div>` : ""}
   `;
 
   $("#new-trip-btn")?.addEventListener("click", () => openTripForm());

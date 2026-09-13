@@ -18,7 +18,7 @@ function renderCatches() {
     : State.catches.filter((c) => c.species === State.catchFilters.species);
 
   root().innerHTML = `
-    <div class="page-header">
+    <div class="page-header center">
       <h1>Catches</h1>
       <p>${State.catches.length} logged catch${State.catches.length === 1 ? "" : "es"}</p>
     </div>
@@ -26,7 +26,7 @@ function renderCatches() {
       <button class="chip ${State.catchFilters.species === "all" ? "active" : ""}" data-sp="all">All</button>
       ${Species.map((s) => `<button class="chip ${State.catchFilters.species === s.id ? "active" : ""}" data-sp="${s.id}" style="display:inline-flex; align-items:center; gap:5px;">${speciesIconHTML(s, 15)} ${esc(s.name)}</button>`).join("")}
     </div>
-    <div class="card" style="padding:6px 10px;">
+    <div class="card ${filtered.length === 0 ? "fill-remaining" : ""}" style="padding:6px 10px;">
       ${filtered.length === 0 ? `
         <div class="empty-state">
           <div class="icon">🐟</div>
@@ -36,7 +36,7 @@ function renderCatches() {
         </div>
       ` : filtered.map((c) => catchListItemHTML(c)).join("")}
     </div>
-    <div class="spacer-lg"></div>
+    ${filtered.length > 0 ? `<div class="spacer-lg"></div>` : ""}
   `;
 
   $$("#catch-species-filter .chip").forEach((chip) => chip.addEventListener("click", () => {

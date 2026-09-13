@@ -33,7 +33,7 @@ function renderBudget() {
   const filterLabels = { month: "This Month", lastMonth: "Last Month", all: "All Time" };
 
   root().innerHTML = `
-    <div class="page-header">
+    <div class="page-header center">
       <h1>Budget</h1>
       <p>Track your fishing costs</p>
     </div>
@@ -59,7 +59,7 @@ function renderBudget() {
     </div>
 
     <div class="section-title">${filtered.length} expense${filtered.length === 1 ? "" : "s"}</div>
-    <div class="card" id="budget-list-card" style="padding:6px 10px;">
+    <div class="card ${filtered.length === 0 ? "fill-remaining" : ""}" id="budget-list-card" style="padding:6px 10px;">
       ${filtered.length === 0 ? `
         <div class="empty-state">
           <div class="icon">${icon("wallet", 34)}</div>
@@ -69,7 +69,7 @@ function renderBudget() {
         </div>
       ` : filtered.map((e) => expenseListItemHTML(e)).join("")}
     </div>
-    <div class="spacer-lg"></div>
+    ${filtered.length > 0 ? `<div class="spacer-lg"></div>` : ""}
   `;
 
   $$("#budget-filter-row .chip").forEach((chip) => chip.addEventListener("click", () => {
