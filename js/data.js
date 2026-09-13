@@ -395,6 +395,9 @@ function getBestSpotsToday(spots, catches, tide, weather, moon, dayScore, now) {
 
   return results.filter((r) => r.points > 0).sort((a, b) => b.points - a.points).slice(0, 3);
 }
+
+// ---------------------------------------------------------------
+// Fishing score across the day — same weighting as getFishingScore,
 // but re-evaluates the tide-driven terms (movement + rising) at
 // each hour while holding today's weather/moon constant, so it can
 // be drawn as a curve the same way the tide card is.
@@ -433,6 +436,38 @@ function getFishingScoreCurve(date, weather, moon) {
     points.push({ h, score, tagClass });
   }
   return points;
+}
+
+// ---------------------------------------------------------------
+// Major/Minor best-time windows — groups the score curve into
+// contiguous "Major" (Excellent-tier) and "Minor" (Moderate-tier)
+// stretches, similar to how solunar tables present peak windows.
+// ---------------------------------------------------------------
+function getMajorMinorWindows(scoreCurve) {
+  const toTimeStr = (h) => {
+    const hh = Math.floor(h) % 24;
+    const mm = Math.round((h - Math.floor(h)) * 60);
+    const d = new Date();
+    d.setHours(hh, mm, 0, 0);
+    return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const windows = [];
+  let current = null;
+  for (const p of scoreCurve) {
+    const kind = p.tagClass === "grass" ? "major" : p.tagClass === "gold" ? "minor" : null;
+    if (kind && current && current.kind === kind) {
+      current.endH = p.h;
+    } else {
+      if (current) windows.push(current);
+      current = kind ? { kind, startH: p.h, endH: p.h } : null;
+    }
+  }
+  if (current) windows.push(current);
+
+  return windows
+    .filter((w) => w.endH - w.startH >= 0.75)
+    .map((w) => ({ ...w, startTime: toTimeStr(w.startH), endTime: toTimeStr(w.endH) }));
 }
 
 function getRecommendation(tide, weather, moon, score) {

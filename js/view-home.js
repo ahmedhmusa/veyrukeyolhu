@@ -74,6 +74,20 @@ function buildScoreCurveSVG(points, nowHours) {
   </svg>`;
 }
 
+function buildScoreGaugeSVG(score, tagClass) {
+  const r = 50, cx = 60, cy = 60;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - score / 100);
+  const color = tierColorVar(tagClass);
+  return `
+  <svg viewBox="0 0 120 120" width="128" height="128">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="10"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="10"
+      stroke-linecap="round" stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+      transform="rotate(-90 ${cx} ${cy})" style="transition: stroke-dashoffset 0.6s cubic-bezier(.22,.61,.36,1);"/>
+  </svg>`;
+}
+
 function renderHome() {
   const now = new Date();
   const tide = getTideModel(now);
@@ -84,6 +98,9 @@ function renderHome() {
   const scoreCurve = getFishingScoreCurve(now, weather, moon);
   const reco = getRecommendation(tide, weather, moon, score);
   const bestSpots = getBestSpotsToday(State.spots, State.catches, tide, weather, moon, score, now);
+  const timeWindows = getMajorMinorWindows(scoreCurve);
+  const majorWindows = timeWindows.filter((w) => w.kind === "major");
+  const minorWindows = timeWindows.filter((w) => w.kind === "minor");
 
   const dateStr = now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
 
@@ -94,17 +111,30 @@ function renderHome() {
     </div>
 
     <div class="card score-card">
-      <div class="score-top">
-        <div>
-          <div class="score-label">FISHING CONDITIONS</div>
-          <div class="score-value-row">
-            <span class="score-value ${score.tagClass}">${score.score}%</span>
-          </div>
+      <div class="score-label" style="text-align:center;">FISHING CONDITIONS</div>
+      <div class="score-gauge-wrap">
+        ${buildScoreGaugeSVG(score.score, score.tagClass)}
+        <div class="score-gauge-center">
+          <span class="score-value ${score.tagClass}">${score.score}%</span>
         </div>
+      </div>
+      <div style="text-align:center;">
         <span class="score-tag ${score.tagClass}">${score.tag}</span>
       </div>
-      <div class="tide-curve-wrap" style="margin-top:12px;">${buildScoreCurveSVG(scoreCurve, tide.nowHours)}</div>
-      <div class="score-note">${esc(reco)}</div>
+      <div class="score-note" style="text-align:center;">${esc(reco)}</div>
+      <div class="tide-curve-wrap" style="margin-top:14px;">${buildScoreCurveSVG(scoreCurve, tide.nowHours)}</div>
+      ${timeWindows.length ? `
+        <div class="time-windows-row">
+          <div class="time-windows-col">
+            <div class="time-windows-label grass">MAJOR TIMES</div>
+            ${majorWindows.length ? majorWindows.map((w) => `<div class="time-window-chip grass">${w.startTime} – ${w.endTime}</div>`).join("") : `<div class="time-window-chip empty">None today</div>`}
+          </div>
+          <div class="time-windows-col">
+            <div class="time-windows-label gold">MINOR TIMES</div>
+            ${minorWindows.length ? minorWindows.map((w) => `<div class="time-window-chip gold">${w.startTime} – ${w.endTime}</div>`).join("") : `<div class="time-window-chip empty">None today</div>`}
+          </div>
+        </div>
+      ` : ""}
       ${bestSpots.length ? `
         <div class="best-spot-pick" id="top-pick-row">
           <span class="best-spot-pick-icon">${icon("pin", 15)}</span>
