@@ -143,7 +143,7 @@ input, select, textarea { font-family: inherit; }
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: calc(var(--safe-top) + 8px) 28px calc(var(--nav-height) + var(--safe-bottom) + 28px);
+  padding: calc(var(--safe-top) + 8px) 20px calc(var(--nav-height) + var(--safe-bottom) + 28px);
   max-width: 720px;
   margin: 0 auto;
   box-sizing: border-box;
@@ -484,9 +484,13 @@ input, select, textarea { font-family: inherit; }
 .swipe-row { position: relative; overflow: hidden; }
 .swipe-row .swipe-content { border-bottom: 1px solid var(--border); }
 .swipe-row:last-child .swipe-content { border-bottom: none; }
+.swipe-row:first-child { border-top-left-radius: calc(var(--radius-lg) - 8px); border-top-right-radius: calc(var(--radius-lg) - 8px); }
+.swipe-row:last-child { border-bottom-left-radius: calc(var(--radius-lg) - 8px); border-bottom-right-radius: calc(var(--radius-lg) - 8px); }
+.swipe-row:first-child .swipe-content, .swipe-row:first-child .swipe-actions { border-top-left-radius: calc(var(--radius-lg) - 8px); border-top-right-radius: calc(var(--radius-lg) - 8px); }
+.swipe-row:last-child .swipe-content, .swipe-row:last-child .swipe-actions { border-bottom-left-radius: calc(var(--radius-lg) - 8px); border-bottom-right-radius: calc(var(--radius-lg) - 8px); }
 .swipe-actions {
   position: absolute; top: 0; right: 0; bottom: 0; width: 84px;
-  display: flex; z-index: 0;
+  display: flex; z-index: 0; overflow: hidden;
 }
 .swipe-delete-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
@@ -714,7 +718,7 @@ input, select, textarea { font-family: inherit; }
 
 /* ---------- Map ---------- */
 #map-canvas { width: 100%; height: 100%; background: var(--border); }
-.map-wrap { position: relative; height: calc(100dvh - var(--nav-height) - var(--safe-top) - var(--safe-bottom)); margin: calc(-1 * (var(--safe-top) + 8px)) -28px 0; }
+.map-wrap { position: relative; height: calc(100dvh - var(--nav-height) - var(--safe-top) - var(--safe-bottom)); margin: calc(-1 * (var(--safe-top) + 8px)) -20px 0; }
 .map-controls-top {
   position: absolute; top: 14px; left: 14px; right: 14px; z-index: 20;
   display: flex; flex-direction: column; gap: 10px;
