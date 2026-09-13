@@ -45,7 +45,7 @@ function renderBudget() {
         ${ExpenseCategories.map((c) => `
           <div class="stat-tile">
             <div class="card-row" style="margin-bottom:2px;">
-              <span style="color:var(--lagoon-deep); display:flex;">${icon(c.icon, 15)}</span>
+              <span style="color:${c.color}; display:flex;">${icon(c.icon, 15)}</span>
               <span class="stat-label" style="margin:0;">${esc(c.name).toUpperCase()}</span>
             </div>
             <div class="stat-value" style="font-size:16px;">${formatCurrency(byCategory[c.id] || 0, State.currency)}</div>
@@ -98,7 +98,7 @@ function expenseListItemHTML(e) {
         <button class="swipe-delete-btn" data-id="${e.id}">${icon("x", 15)}<span>Delete</span></button>
       </div>
       <div class="swipe-content list-item expense-row" data-id="${e.id}">
-        <div class="list-thumb placeholder" style="color:var(--lagoon-deep);">${icon(cat.icon, 22)}</div>
+        <div class="list-thumb placeholder" style="color:${cat.color}; background:color-mix(in srgb, ${cat.color} 16%, transparent);">${icon(cat.icon, 22)}</div>
         <div class="list-main">
           <div class="list-title">${esc(e.description || cat.name)}</div>
           <div class="list-sub">${d.toLocaleDateString(undefined, { day: "numeric", month: "short" })}${trip ? " · " + esc(trip.name) : ""}</div>
@@ -119,7 +119,7 @@ function openExpenseForm(expense = null) {
     <div class="field">
       <label>Category</label>
       <div class="species-grid" id="expense-category-grid">
-        ${ExpenseCategories.map((c) => `<button type="button" class="species-btn ${expense?.category === c.id ? "active" : ""}" data-id="${c.id}"><span class="em">${icon(c.icon, 20)}</span>${esc(c.name)}</button>`).join("")}
+        ${ExpenseCategories.map((c) => `<button type="button" class="species-btn ${expense?.category === c.id ? "active" : ""}" data-id="${c.id}"><span class="em" style="color:${c.color};">${icon(c.icon, 20)}</span>${esc(c.name)}</button>`).join("")}
       </div>
     </div>
 

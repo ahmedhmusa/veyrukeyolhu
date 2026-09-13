@@ -22,11 +22,11 @@ const Species = [
 const Techniques = ["Jigging", "Popping", "Trolling", "Bottom fishing", "Casting", "Handline", "Fly fishing"];
 
 const ExpenseCategories = [
-  { id: "fuel", name: "Fuel", icon: "fuel" },
-  { id: "tackle", name: "Tackle & Gear", icon: "hook" },
-  { id: "food", name: "Food & Drinks", icon: "cup" },
-  { id: "maintenance", name: "Boat & Maintenance", icon: "wrench" },
-  { id: "other", name: "Other", icon: "dots" },
+  { id: "fuel", name: "Fuel", icon: "fuel", color: "var(--lagoon-deep)" },
+  { id: "tackle", name: "Tackle & Gear", icon: "hook", color: "var(--reef-gold)" },
+  { id: "food", name: "Food & Drinks", icon: "cup", color: "var(--seagrass)" },
+  { id: "maintenance", name: "Boat & Maintenance", icon: "wrench", color: "var(--info-blue)" },
+  { id: "other", name: "Other", icon: "dots", color: "var(--text-tertiary)" },
 ];
 
 const CurrencySymbols = { MVR: "Rf", USD: "$", EUR: "€", GBP: "£" };
