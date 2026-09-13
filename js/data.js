@@ -408,7 +408,7 @@ function getBestSpotsToday(spots, catches, tide, weather, moon, dayScore, now) {
     return { spot, points, reasons, catchCount: spotCatches.length };
   });
 
-  return results.filter((r) => r.points > 0).sort((a, b) => b.points - a.points).slice(0, 3);
+  return results.filter((r) => r.points > 0).sort((a, b) => b.points - a.points).slice(0, 2);
 }
 
 // ---------------------------------------------------------------
