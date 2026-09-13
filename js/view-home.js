@@ -160,8 +160,14 @@ function renderHome() {
   const reco = getRecommendation(tide, weather, moon, score);
   const bestSpots = getBestSpotsToday(State.spots, State.catches, tide, weather, moon, score, now);
   const timeWindows = getMajorMinorWindows(scoreCurve);
-  const majorWindows = timeWindows.filter((w) => w.kind === "major");
-  const minorWindows = timeWindows.filter((w) => w.kind === "minor");
+  const nowH = now.getHours() + now.getMinutes() / 60;
+  const byRelevance = (a, b) => {
+    const da = a.endH < nowH ? a.startH + 24 - nowH : a.startH - nowH;
+    const db = b.endH < nowH ? b.startH + 24 - nowH : b.startH - nowH;
+    return da - db;
+  };
+  const majorWindows = timeWindows.filter((w) => w.kind === "major").sort(byRelevance).slice(0, 2);
+  const minorWindows = timeWindows.filter((w) => w.kind === "minor").sort(byRelevance).slice(0, 2);
 
   const dateStr = now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
 
