@@ -53,6 +53,7 @@
   --blur-strong: 40px;
   --nav-height: 78px;
   --map-strip-height: 98px;
+  --map-controls-bottom: calc(var(--nav-height) + var(--safe-bottom) + 14px);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
@@ -740,18 +741,17 @@ input, select, textarea { font-family: inherit; }
 }
 :root[data-theme="dark"] .map-legend-icon-btn { color: var(--lagoon); }
 .map-fab-locate {
-  position: absolute; right: 14px; z-index: 20;
+  position: fixed; right: 14px; z-index: 20;
   width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--glass-border-soft);
   background: var(--surface-strong); backdrop-filter: blur(var(--blur-strong)) saturate(1.7);
   -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(1.7);
   box-shadow: var(--shadow-card), var(--glass-inner-glow);
   font-size: 19px; display: flex; align-items: center; justify-content: center;
-  transition: bottom 0.2s ease;
 }
 
 /* ---------- Nearby spots strip ---------- */
 .map-spots-strip {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
+  position: fixed; left: 0; right: 0; bottom: var(--map-controls-bottom); z-index: 20;
   height: var(--map-strip-height);
   display: flex; align-items: center; gap: 10px;
   padding: 10px 14px;
