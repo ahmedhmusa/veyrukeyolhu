@@ -157,6 +157,7 @@ const ICONS = {
 // so they still adopt currentColor like the hand-drawn SVG icons above.
 const MASK_ICONS = {
   tripBoat: "./icons/tab-trip-boat.png",
+  catchHook: "./icons/tab-catch-hook.png",
 };
 
 function icon(name, size = 20) {
@@ -190,7 +191,7 @@ const TABS = [
   { id: "home", label: "Home", icon: "home" },
   { id: "map", label: "Map", icon: "map" },
   { id: "trips", label: "Trips", icon: "tripBoat" },
-  { id: "catches", label: "Catches", icon: "fish" },
+  { id: "catches", label: "Catches", icon: "catchHook" },
   { id: "more", label: "More", icon: "sliders" },
 ];
 
