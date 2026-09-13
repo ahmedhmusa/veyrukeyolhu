@@ -6,8 +6,8 @@
 // ===================================================================
 
 const DB_NAME = "veyrukeyolhu";
-const DB_VERSION = 1;
-const STORES = ["spots", "catches", "trips", "settings"];
+const DB_VERSION = 2;
+const STORES = ["spots", "catches", "trips", "settings", "expenses"];
 
 let _dbPromise = null;
 
@@ -21,6 +21,7 @@ function openDB() {
       if (!db.objectStoreNames.contains("catches")) db.createObjectStore("catches", { keyPath: "id" });
       if (!db.objectStoreNames.contains("trips")) db.createObjectStore("trips", { keyPath: "id" });
       if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings", { keyPath: "key" });
+      if (!db.objectStoreNames.contains("expenses")) db.createObjectStore("expenses", { keyPath: "id" });
     };
     req.onsuccess = (e) => resolve(e.target.result);
     req.onerror = (e) => reject(e.target.error);
@@ -91,6 +92,7 @@ async function seedIfEmpty() {
   for (const s of SampleSpots) await dbPut("spots", s);
   for (const c of SampleCatches) await dbPut("catches", c);
   for (const t of SampleTrips) await dbPut("trips", t);
+  for (const e of SampleExpenses) await dbPut("expenses", e);
   return true;
 }
 

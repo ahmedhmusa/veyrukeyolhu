@@ -35,6 +35,12 @@ function renderMore() {
           <button data-units-opt="imperial" class="${State.units === "imperial" ? "active" : ""}">lb / ft</button>
         </div>
       </div>
+      <div class="settings-row">
+        <span class="settings-label">${icon("wallet", 16)} Currency</span>
+        <div class="segmented" style="width:160px;">
+          ${Object.keys(CurrencySymbols).map((c) => `<button data-currency-opt="${c}" class="${State.currency === c ? "active" : ""}">${c}</button>`).join("")}
+        </div>
+      </div>
     </div>
 
     <div class="section-title">App</div>
@@ -100,6 +106,11 @@ function renderMore() {
   $$("[data-units-opt]").forEach((btn) => btn.addEventListener("click", async () => {
     State.units = btn.dataset.unitsOpt;
     await setSetting("units", State.units);
+    renderMore();
+  }));
+  $$("[data-currency-opt]").forEach((btn) => btn.addEventListener("click", async () => {
+    State.currency = btn.dataset.currencyOpt;
+    await setSetting("currency", State.currency);
     renderMore();
   }));
   $("#about-sync-btn").addEventListener("click", openSyncInfoSheet);

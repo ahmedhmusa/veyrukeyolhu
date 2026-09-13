@@ -20,6 +20,21 @@ const Species = [
 ];
 
 const Techniques = ["Jigging", "Popping", "Trolling", "Bottom fishing", "Casting", "Handline", "Fly fishing"];
+
+const ExpenseCategories = [
+  { id: "fuel", name: "Fuel", icon: "fuel" },
+  { id: "tackle", name: "Tackle & Gear", icon: "hook" },
+  { id: "food", name: "Food & Drinks", icon: "cup" },
+  { id: "maintenance", name: "Boat & Maintenance", icon: "wrench" },
+  { id: "other", name: "Other", icon: "dots" },
+];
+
+const CurrencySymbols = { MVR: "Rf", USD: "$", EUR: "€", GBP: "£" };
+function formatCurrency(amount, currency = "MVR") {
+  const symbol = CurrencySymbols[currency] || currency;
+  const val = (Math.round((amount || 0) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${symbol} ${val}`;
+}
 const Atolls = [
   "Kaafu (Male' Atoll)", "Baa Atoll", "Ari Atoll", "Vaavu Atoll", "Meemu Atoll",
   "Laamu Atoll", "Gaafu Alifu", "Gaafu Dhaalu", "Addu Atoll", "Haa Alifu", "Haa Dhaalu",
@@ -547,6 +562,13 @@ const SampleTrips = [
     technique: "Jigging", weather: "Partly cloudy", seaCondition: "Slight", wind: "16mph NE",
     notes: "Strong current at the channel, two GT landed.", photos: [], catchIds: ["seed-catch-1"], status: "completed",
   },
+];
+
+const SampleExpenses = [
+  { id: "seed-exp-1", date: Date.now() - 86400000 * 2, category: "fuel", amount: 850, description: "Diesel top-up", tripId: "seed-trip-1", notes: "", photos: [] },
+  { id: "seed-exp-2", date: Date.now() - 86400000 * 5, category: "tackle", amount: 1250, description: "250g jigs x3", tripId: null, notes: "New silver knife jigs", photos: [] },
+  { id: "seed-exp-3", date: Date.now() - 86400000 * 2, category: "food", amount: 180, description: "Snacks & water", tripId: "seed-trip-1", notes: "", photos: [] },
+  { id: "seed-exp-4", date: Date.now() - 86400000 * 9, category: "maintenance", amount: 600, description: "Engine oil change", tripId: null, notes: "", photos: [] },
 ];
 
 const DEFAULT_LOCATION = { lat: 4.1755, lng: 73.5093, label: "Male', Maldives" }; // fallback map center

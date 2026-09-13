@@ -7,8 +7,10 @@ const State = {
   spots: [],
   catches: [],
   trips: [],
+  expenses: [],
   theme: "system",
   units: "metric",
+  currency: "MVR",
   userName: "Angler",
   gps: null, // {lat, lng}
   online: navigator.onLine,
@@ -85,6 +87,7 @@ function renderOfflineBanner() {
 async function initApp() {
   State.theme = await getSetting("theme", "system");
   State.units = await getSetting("units", "metric");
+  State.currency = await getSetting("currency", "MVR");
   State.userName = await getSetting("userName", "Angler");
   State.mapLayerType = await getSetting("mapLayerType", "street");
   applyTheme();
@@ -115,9 +118,11 @@ async function reloadAllData() {
   State.spots = await dbGetAll("spots");
   State.catches = await dbGetAll("catches");
   State.trips = await dbGetAll("trips");
+  State.expenses = await dbGetAll("expenses");
   State.spots.sort((a, b) => b.createdAt - a.createdAt);
   State.catches.sort((a, b) => b.datetime - a.datetime);
   State.trips.sort((a, b) => b.date - a.date);
+  State.expenses.sort((a, b) => b.date - a.date);
 }
 
 function tryQuickLocation() {
@@ -152,6 +157,11 @@ const ICONS = {
   wifi: '<path d="M2 8.5a15 15 0 0 1 20 0" stroke-linecap="round"/><path d="M5.5 12.3a10 10 0 0 1 13 0" stroke-linecap="round"/><path d="M9 16a5 5 0 0 1 6 0" stroke-linecap="round"/><circle cx="12" cy="19.3" r="1" fill="currentColor" stroke="none"/>',
   globe: '<circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/><line x1="3.5" y1="12" x2="20.5" y2="12" stroke-linecap="round"/><path d="M4.5 7.5h15M4.5 16.5h15" stroke-linecap="round"/>',
   x: '<line x1="5" y1="5" x2="19" y2="19" stroke-linecap="round"/><line x1="19" y1="5" x2="5" y2="19" stroke-linecap="round"/>',
+  wallet: '<path d="M4 7.7c0-1.2 1-2.2 2.2-2.2h11.6c1.2 0 2.2 1 2.2 2.2v1.8h-3.8a2.7 2.7 0 0 0 0 5.4H20v1.7c0 1.2-1 2.2-2.2 2.2H6.2A2.2 2.2 0 0 1 4 16.6V7.7Z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15.6" cy="12.5" r=".9" fill="currentColor" stroke="none"/>',
+  fuel: '<path d="M12 3.4c3.1 4 5.6 7.5 5.6 10.3a5.6 5.6 0 1 1-11.2 0c0-2.8 2.5-6.3 5.6-10.3Z" stroke-linecap="round" stroke-linejoin="round"/>',
+  cup: '<path d="M6.2 8h10.6l-1 9.3a2 2 0 0 1-2 1.7h-4.6a2 2 0 0 1-2-1.7L6.2 8Z" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.6 9.3h1.6a2.4 2.4 0 1 1 0 4.8h-1.9" stroke-linecap="round"/><line x1="9" y1="4.5" x2="9" y2="7" stroke-linecap="round"/><line x1="12" y1="3.7" x2="12" y2="7" stroke-linecap="round"/>',
+  wrench: '<path d="M14.7 6.2a4 4 0 0 0-5.3 5.3L4 17l3 3 5.5-5.4a4 4 0 0 0 5.3-5.3l-2.8 2.8-2.6-2.6Z" stroke-linecap="round" stroke-linejoin="round"/>',
+  dots: '<circle cx="6" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.3" fill="currentColor" stroke="none"/>',
 };
 
 // Icons sourced from an image (custom uploads) rendered via a CSS mask
@@ -193,8 +203,16 @@ const TABS = [
   { id: "map", label: "Map", icon: "map" },
   { id: "trips", label: "Trips", icon: "tripBoat" },
   { id: "catches", label: "Catches", icon: "catchHook" },
+  { id: "budget", label: "Budget", icon: "wallet" },
   { id: "more", label: "More", icon: "sliders" },
 ];
+
+// Per-tab FAB configuration: which icon to show and what it does.
+// Tabs not listed here get no FAB at all.
+const FAB_CONFIG = {
+  catches: { icon: "hook", label: "Log catch", action: () => openCatchForm() },
+  budget: { icon: "plus", label: "Add expense", action: () => openExpenseForm() },
+};
 
 function renderShell() {
   const app = document.getElementById("app-shell");
@@ -203,7 +221,7 @@ function renderShell() {
       <span>${icon("wifiOff", 16)}</span><span>Offline — changes are saved on this device and kept safe.</span>
     </div>
     <main id="app-root" class="app"></main>
-    <button id="fab-log-catch" class="fab fab-icon-only" title="Log catch" aria-label="Log catch"><span class="tab-icon">${icon("hook", 22)}</span></button>
+    <button id="app-fab" class="fab fab-icon-only" title="" aria-label=""><span class="tab-icon" id="app-fab-icon"></span></button>
     <nav class="tabbar" id="tabbar">
       ${TABS.map((t) => `
         <button class="tab" data-tab="${t.id}">
@@ -216,7 +234,6 @@ function renderShell() {
     <div id="sheet-root"></div>
   `;
   $$(".tab").forEach((btn) => btn.addEventListener("click", () => navigate(btn.dataset.tab)));
-  $("#fab-log-catch").addEventListener("click", () => openCatchForm());
 }
 
 function navigate(tab) {
@@ -224,10 +241,21 @@ function navigate(tab) {
   State.tab = tab;
   location.hash = tab;
   $$(".tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
-  const fab = $("#fab-log-catch");
-  fab.style.display = tab === "catches" ? "flex" : "none";
 
-  const views = { home: renderHome, map: renderMap, trips: renderTrips, catches: renderCatches, more: renderMore };
+  const fab = $("#app-fab");
+  const cfg = FAB_CONFIG[tab];
+  if (cfg) {
+    fab.style.display = "flex";
+    fab.title = cfg.label;
+    fab.setAttribute("aria-label", cfg.label);
+    $("#app-fab-icon").innerHTML = icon(cfg.icon, 22);
+    fab.onclick = cfg.action;
+  } else {
+    fab.style.display = "none";
+    fab.onclick = null;
+  }
+
+  const views = { home: renderHome, map: renderMap, trips: renderTrips, catches: renderCatches, budget: renderBudget, more: renderMore };
   (views[tab] || renderHome)();
 }
 window.addEventListener("hashchange", () => navigate(location.hash.replace("#", "")));
