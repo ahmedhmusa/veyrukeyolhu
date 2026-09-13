@@ -83,6 +83,7 @@ function renderHome() {
   const score = getFishingScore(tide, weather, moon);
   const scoreCurve = getFishingScoreCurve(now, weather, moon);
   const reco = getRecommendation(tide, weather, moon, score);
+  const bestSpots = getBestSpotsToday(State.spots, State.catches, tide, weather, moon, score, now);
 
   const dateStr = now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
 
@@ -104,8 +105,38 @@ function renderHome() {
       </div>
       <div class="tide-curve-wrap" style="margin-top:12px;">${buildScoreCurveSVG(scoreCurve, tide.nowHours)}</div>
       <div class="score-note">${esc(reco)}</div>
+      ${bestSpots.length ? `
+        <div class="best-spot-pick" id="top-pick-row">
+          <span class="best-spot-pick-icon">${icon("pin", 15)}</span>
+          <span>Top pick today: <b>${esc(bestSpots[0].spot.name)}</b></span>
+          <span class="list-chevron">›</span>
+        </div>
+      ` : ""}
       <div class="score-disclaimer">Personal, estimated score based on tide, moon, wind and your logged preferences — not a scientific forecast.</div>
     </div>
+
+    ${bestSpots.length ? `
+      <div class="section-title">Best Spots Today</div>
+      <div class="card" style="padding:6px 10px;">
+        ${bestSpots.map((r, i) => `
+          <div class="list-item best-spot-row" data-spot-id="${r.spot.id}" style="cursor:pointer;">
+            <div class="best-spot-rank">${i + 1}</div>
+            <div class="list-main">
+              <div class="list-title">${esc(r.spot.name)}${r.spot.favourite ? ` ${icon("star", 12)}` : ""}</div>
+              <div class="list-sub">${esc(r.reasons[0] || "")}</div>
+              ${r.reasons.length > 1 ? `<div class="best-spot-reasons">${r.reasons.slice(1).map((rs) => `<span class="badge grass" style="margin-top:4px;">${esc(rs)}</span>`).join("")}</div>` : ""}
+            </div>
+            <span class="list-chevron">›</span>
+          </div>
+        `).join("")}
+      </div>
+      <div class="score-disclaimer" style="margin: -8px 2px 4px;">Based on today's tide/moon/wind and your own logged spots and catches — a personal suggestion, not a guarantee.</div>
+    ` : (State.spots.length === 0 ? `
+      <div class="section-title">Best Spots Today</div>
+      <div class="card text-center" style="padding:24px 18px;">
+        <div style="font-size:13.5px; color:var(--text-secondary); line-height:1.5;">Add a few fishing spots on the Map tab — with a best tide/time set — and log some catches, and this section will suggest where to go today.</div>
+      </div>
+    ` : "")}
 
     <div class="section-title">Conditions</div>
     <div class="card" id="conditions-card" style="cursor:pointer;">
@@ -185,6 +216,8 @@ function renderHome() {
     if (e.target.closest("#live-tide-link")) return;
     openTideDetailSheet(now);
   });
+  $("#top-pick-row")?.addEventListener("click", () => openSpotDetail(bestSpots[0].spot.id));
+  $$(".best-spot-row").forEach((el) => el.addEventListener("click", () => openSpotDetail(el.dataset.spotId)));
 }
 
 function buildExtendedTideCurveSVG(forecast) {

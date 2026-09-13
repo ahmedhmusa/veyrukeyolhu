@@ -314,7 +314,87 @@ function getFishingScore(tide, weather, moon) {
 }
 
 // ---------------------------------------------------------------
-// Fishing score across the day — same weighting as getFishingScore,
+// Best spots today — cross-references today's tide/moon/weather
+// with each saved spot's own best-tide/best-time notes and the
+// user's own catch history at that spot. This is a personal,
+// rules-based match score (not a scientific prediction) meant to
+// help decide where to fish today based on your own logged data.
+// ---------------------------------------------------------------
+function getTimeBucketKeywords(hour) {
+  if (hour < 5) return ["night"];
+  if (hour < 7) return ["dawn", "early morning", "sunrise", "morning"];
+  if (hour < 10) return ["morning"];
+  if (hour < 12) return ["late morning", "morning", "midday"];
+  if (hour < 14) return ["midday", "noon", "afternoon"];
+  if (hour < 17) return ["afternoon"];
+  if (hour < 19) return ["dusk", "evening", "sunset"];
+  return ["evening", "night"];
+}
+
+function bestTimeMatches(bestTime, hour) {
+  if (!bestTime) return false;
+  const bt = bestTime.toLowerCase();
+  if (bt.includes("any")) return true;
+  return getTimeBucketKeywords(hour).some((k) => bt.includes(k));
+}
+
+function bestTideMatches(bestTide, tideRising, nearHigh, nearLow) {
+  if (!bestTide) return false;
+  const bt = bestTide.toLowerCase();
+  if (bt.includes("any")) return true;
+  if ((bt.includes("incoming") || bt.includes("rising")) && tideRising) return true;
+  if ((bt.includes("outgoing") || bt.includes("falling")) && !tideRising) return true;
+  if (bt.includes("high") && nearHigh) return true;
+  if (bt.includes("low") && nearLow && !bt.includes("low to rising")) return true;
+  if (bt.includes("low to rising") && (nearLow || tideRising)) return true;
+  return false;
+}
+
+function getBestSpotsToday(spots, catches, tide, weather, moon, dayScore, now) {
+  if (!spots || spots.length === 0) return [];
+  const hour = now.getHours() + now.getMinutes() / 60;
+  const nearHigh = tide.currentHeight > tide.baseHeight + tide.amplitude * 0.65;
+  const nearLow = tide.currentHeight < tide.baseHeight - tide.amplitude * 0.65;
+
+  const results = spots.map((spot) => {
+    let points = 0;
+    const reasons = [];
+
+    if (bestTideMatches(spot.bestTide, tide.rising, nearHigh, nearLow)) {
+      points += 28;
+      reasons.push(`Matches its best tide (${spot.bestTide})`);
+    }
+    if (bestTimeMatches(spot.bestTime, hour)) {
+      points += 18;
+      reasons.push(`Good time of day (${spot.bestTime})`);
+    }
+
+    const spotCatches = catches.filter((c) => c.spotId === spot.id);
+    if (spotCatches.length > 0) {
+      points += Math.min(spotCatches.length * 8, 24);
+      reasons.push(`${spotCatches.length} catch${spotCatches.length === 1 ? "" : "es"} logged here`);
+
+      const tideMatchCount = spotCatches.filter((c) => (c.tide === "Rising") === tide.rising).length;
+      if (tideMatchCount > 0) {
+        points += 10;
+        reasons.push(`Past catch here on a similar tide`);
+      }
+      const moonMatchCount = spotCatches.filter((c) => c.moon === moon.name).length;
+      if (moonMatchCount > 0) {
+        points += 6;
+        reasons.push(`Caught here during a ${moon.name.toLowerCase()} before`);
+      }
+    }
+    if (spot.favourite) points += 6;
+
+    // Scale by today's overall conditions score, so a slow day pulls every pick down
+    points = Math.round(points * (0.55 + dayScore.score / 200));
+
+    return { spot, points, reasons, catchCount: spotCatches.length };
+  });
+
+  return results.filter((r) => r.points > 0).sort((a, b) => b.points - a.points).slice(0, 3);
+}
 // but re-evaluates the tide-driven terms (movement + rising) at
 // each hour while holding today's weather/moon constant, so it can
 // be drawn as a curve the same way the tide card is.
