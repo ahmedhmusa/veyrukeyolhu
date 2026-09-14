@@ -274,6 +274,7 @@ function openSheet(innerHTML, { tall = false, onClose = null } = {}) {
       <button class="sheet-float-close" id="sheet-float-close-btn" aria-label="Close">${icon("x", 18)}</button>
     </div>
   `;
+  lockBackgroundScroll();
   const overlay = $("#active-sheet-overlay");
   requestAnimationFrame(() => overlay.classList.add("open"));
   overlay.addEventListener("click", (e) => {
@@ -288,7 +289,28 @@ function closeSheet() {
   if (!overlay) return;
   overlay.classList.remove("open");
   const cb = overlay._onClose;
-  setTimeout(() => { $("#sheet-root").innerHTML = ""; if (cb) cb(); }, 260);
+  setTimeout(() => { $("#sheet-root").innerHTML = ""; unlockBackgroundScroll(); if (cb) cb(); }, 260);
+}
+
+// Prevents the page behind an open sheet from scrolling (including
+// iOS Safari's rubber-band overscroll), while preserving the exact
+// scroll position so the page doesn't jump when the sheet closes.
+let _scrollLockY = 0;
+function lockBackgroundScroll() {
+  _scrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${_scrollLockY}px`;
+  document.body.style.left = "0";
+  document.body.style.right = "0";
+  document.body.style.width = "100%";
+}
+function unlockBackgroundScroll() {
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  window.scrollTo(0, _scrollLockY);
 }
 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
