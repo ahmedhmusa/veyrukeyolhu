@@ -84,15 +84,27 @@ function uid(prefix = "id") {
 }
 
 // ---------------------------------------------------------------
-// Seed sample data on first run only
+// Seed sample data on first run only — tracked with a persistent
+// flag rather than "are there zero spots?", so that deleting all
+// your real data later doesn't bring the demo data back.
 // ---------------------------------------------------------------
 async function seedIfEmpty() {
+  const alreadySeeded = await getSetting("hasSeeded", false);
+  if (alreadySeeded) return false;
+
   const count = await dbCount("spots");
-  if (count > 0) return false;
+  if (count > 0) {
+    // Existing data from before this flag existed — don't touch it,
+    // just mark seeding as done so it's never re-triggered.
+    await setSetting("hasSeeded", true);
+    return false;
+  }
+
   for (const s of SampleSpots) await dbPut("spots", s);
   for (const c of SampleCatches) await dbPut("catches", c);
   for (const t of SampleTrips) await dbPut("trips", t);
   for (const e of SampleExpenses) await dbPut("expenses", e);
+  await setSetting("hasSeeded", true);
   return true;
 }
 

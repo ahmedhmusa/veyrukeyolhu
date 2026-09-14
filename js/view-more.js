@@ -201,10 +201,11 @@ function importBackup(e) {
 }
 
 async function eraseAllData() {
-  if (!confirm("This will permanently erase all trips, catches and spots on this device. This can't be undone. Continue?")) return;
+  if (!confirm("This will permanently erase all trips, catches, spots and expenses on this device. This can't be undone. Continue?")) return;
   for (const s of State.spots) await dbDelete("spots", s.id);
   for (const c of State.catches) await dbDelete("catches", c.id);
   for (const t of State.trips) await dbDelete("trips", t.id);
+  for (const e of State.expenses) await dbDelete("expenses", e.id);
   await reloadAllData();
   toast("All data erased");
   renderMore();
